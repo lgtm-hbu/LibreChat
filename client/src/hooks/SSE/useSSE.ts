@@ -14,9 +14,9 @@ import {
 } from 'librechat-data-provider';
 import { useGetUserBalance, useGetStartupConfig } from 'librechat-data-provider/react-query';
 import type { TResPlugin, TMessage, TConversation, TSubmission } from 'librechat-data-provider';
-import { useAuthContext } from './AuthContext';
-import useChatHelpers from './useChatHelpers';
-import useSetStorage from './useSetStorage';
+import { useAuthContext } from '../AuthContext';
+import useChatHelpers from '../useChatHelpers';
+import useSetStorage from '../useSetStorage';
 
 type TResData = {
   plugin?: TResPlugin;
@@ -375,6 +375,8 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
       payload = removeNullishValues(payload);
     }
 
+    let textIndex = null;
+
     const events = new SSE(payloadData.server, {
       payload: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -397,6 +399,12 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
         };
         createdHandler(data, { ...submission, message });
       } else {
+        if (!data.text) {
+          console.log(data);
+        } else if (data.index !== textIndex) {
+          textIndex = data.index;
+          console.log('message index', textIndex);
+        }
         const text = data.text || data.response;
         const { plugin, plugins } = data;
 
