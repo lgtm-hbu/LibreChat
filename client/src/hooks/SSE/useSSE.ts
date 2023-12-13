@@ -14,6 +14,7 @@ import {
 } from 'librechat-data-provider';
 import { useGetUserBalance, useGetStartupConfig } from 'librechat-data-provider/react-query';
 import type { TResPlugin, TMessage, TConversation, TSubmission } from 'librechat-data-provider';
+import useContentHandler from './useContentHandler';
 import { useAuthContext } from '../AuthContext';
 import useChatHelpers from '../useChatHelpers';
 import useSetStorage from '../useSetStorage';
@@ -42,6 +43,7 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
     invalidateConvos,
     newConversation,
   } = useChatHelpers(index, paramId);
+  const contentHandler = useContentHandler({ setMessages, setConversation });
 
   const { data: startupConfig } = useGetStartupConfig();
   const balanceQuery = useGetUserBalance({
@@ -398,13 +400,17 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
           overrideParentMessageId: message?.overrideParentMessageId,
         };
         createdHandler(data, { ...submission, message });
-      } else {
-        if (!data.text) {
+      } else if (data.type) {
+        const { text, index } = data;
+        if (!text) {
           console.log(data);
-        } else if (data.index !== textIndex) {
-          textIndex = data.index;
+        } else if (index !== textIndex) {
+          textIndex = index;
           console.log('message index', textIndex);
         }
+
+        contentHandler({ data, submission });
+      } else {
         const text = data.text || data.response;
         const { plugin, plugins } = data;
 
