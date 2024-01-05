@@ -39,6 +39,12 @@
  */
 
 /**
+ * @exports TMessage
+ * @typedef {import('librechat-data-provider').TMessage} TMessage
+ * @memberof typedefs
+ */
+
+/**
  * @exports ImageMetadata
  * @typedef {Object} ImageMetadata
  * @property {string} file_id - The identifier of the file.
