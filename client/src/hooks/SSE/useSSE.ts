@@ -5,6 +5,7 @@ import {
   /* @ts-ignore */
   SSE,
   EndpointURLs,
+  Constants,
   createPayload,
   tPresetSchema,
   tMessageSchema,
@@ -106,7 +107,7 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
     }
 
     // refresh title
-    if (requestMessage?.parentMessageId == '00000000-0000-0000-0000-000000000000') {
+    if (requestMessage?.parentMessageId == Constants.NO_PARENT) {
       setTimeout(() => {
         invalidateConvos();
       }, 2000);
@@ -166,7 +167,7 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
       setStorage(update);
       return update;
     });
-    if (message.parentMessageId == '00000000-0000-0000-0000-000000000000') {
+    if (message.parentMessageId == Constants.NO_PARENT) {
       addConvo(update);
     }
     resetLatestMessage();
@@ -186,7 +187,7 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
     }
 
     // refresh title
-    if (requestMessage.parentMessageId == '00000000-0000-0000-0000-000000000000') {
+    if (requestMessage.parentMessageId == Constants.NO_PARENT) {
       setTimeout(() => {
         invalidateConvos();
       }, 1500);
