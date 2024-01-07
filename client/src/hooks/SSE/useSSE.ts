@@ -179,10 +179,10 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
 
     setCompleted((prev) => new Set(prev.add(submission?.initialResponse?.messageId)));
 
-    // update the messages
-    if (isRegenerate) {
+    // update the messages; if assistants endpoint, client doesn't receive responseMessage
+    if (isRegenerate && responseMessage) {
       setMessages([...messages, responseMessage]);
-    } else {
+    } else if (responseMessage) {
       setMessages([...messages, requestMessage, responseMessage]);
     }
 
@@ -336,7 +336,7 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
         cancelHandler(data, submission);
       })
       .catch((error) => {
-        console.error('Error aborting request');
+        console.error('Error cancelling request');
         console.error(error);
         const convoId = conversationId ?? v4();
 
