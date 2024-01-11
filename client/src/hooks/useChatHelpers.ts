@@ -13,7 +13,7 @@ import type {
   TGetConversationsResponse,
 } from 'librechat-data-provider';
 import type { TAskFunction } from '~/common';
-import useSetFilesToDelete from './useSetFilesToDelete';
+import useSetFilesToDelete from './Files/useSetFilesToDelete';
 import useGetSender from './Conversations/useGetSender';
 import { useAuthContext } from './AuthContext';
 import useUserKey from './Input/useUserKey';
