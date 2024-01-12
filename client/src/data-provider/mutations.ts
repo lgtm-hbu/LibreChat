@@ -3,7 +3,6 @@ import type { UseMutationResult } from '@tanstack/react-query';
 import type {
   TFileUpload,
   UploadMutationOptions,
-  FileUploadBody,
   DeleteFilesResponse,
   DeleteFilesBody,
   DeleteMutationOptions,
@@ -20,16 +19,24 @@ import { dataService, MutationKeys } from 'librechat-data-provider';
 import { useSetRecoilState } from 'recoil';
 import store from '~/store';
 
-export const useUploadImageMutation = (
+export const useUploadFileMutation = (
   options?: UploadMutationOptions,
 ): UseMutationResult<
   TFileUpload, // response data
   unknown, // error
-  FileUploadBody, // request
+  FormData, // request
   unknown // context
 > => {
-  return useMutation([MutationKeys.imageUpload], {
-    mutationFn: (body: FileUploadBody) => dataService.uploadImage(body.formData),
+  return useMutation([MutationKeys.fileUpload], {
+    mutationFn: (body: FormData) => {
+      const height = body.get('height');
+      const width = body.get('width');
+      if (height && width) {
+        return dataService.uploadImage(body);
+      }
+
+      return dataService.uploadFile(body);
+    },
     ...(options || {}),
   });
 };
