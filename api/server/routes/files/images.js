@@ -1,7 +1,6 @@
 const fs = require('fs').promises;
 const express = require('express');
-const { imageMimeTypes, isUUID } = require('librechat-data-provider');
-const { processImageUpload } = require('~/server/services/Files/process');
+const { filterFile, processImageUpload } = require('~/server/services/Files/process');
 const { logger } = require('~/config');
 const upload = require('./multer');
 
@@ -12,36 +11,14 @@ router.post('/', upload.single('file'), async (req, res) => {
   const metadata = req.body;
 
   try {
-    if (!file) {
-      throw new Error('No file provided');
-    }
-    if (!imageMimeTypes.test(file.mimetype)) {
-      throw new Error('Unsupported file type');
-    }
+    filterFile({ req, file, image: true });
 
-    if (!metadata.endpoint) {
-      throw new Error('No endpoint provided');
-    }
-
-    if (!metadata.file_id) {
-      throw new Error('No file_id provided');
-    }
-
-    if (!metadata.width) {
-      throw new Error('No width provided');
-    }
-
-    if (!metadata.height) {
-      throw new Error('No height provided');
-    }
-
-    /* parse to validate api call */
-    isUUID.parse(metadata.file_id);
     metadata.temp_file_id = metadata.file_id;
     metadata.file_id = req.file_id;
 
     await processImageUpload({ req, res, file, metadata });
   } catch (error) {
+    // TODO: delete remote file if it exists
     logger.error('[/files/images] Error processing file:', error);
     try {
       await fs.unlink(file.path);
@@ -50,16 +27,6 @@ router.post('/', upload.single('file'), async (req, res) => {
     }
     res.status(500).json({ message: 'Error processing file' });
   }
-
-  // do this if strategy is not local
-  // finally {
-  //   try {
-  //     // await fs.unlink(file.path);
-  //   } catch (error) {
-  //     logger.error('[/files/images] Error deleting file:', error);
-
-  //   }
-  // }
 });
 
 module.exports = router;
