@@ -24,10 +24,18 @@ type TResData = {
   plugin?: TResPlugin;
   final?: boolean;
   initial?: boolean;
+  previousMessages?: TMessage[];
   requestMessage: TMessage;
   responseMessage: TMessage;
   conversation: TConversation;
   conversationId?: string;
+};
+
+type TSyncData = {
+  sync: boolean;
+  messages: TMessage[];
+  responseMessage: TMessage;
+  conversationId: string;
 };
 
 export default function useSSE(submission: TSubmission | null, index = 0) {
@@ -35,16 +43,18 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
   const { conversationId: paramId } = useParams();
   const { token, isAuthenticated } = useAuthContext();
   const [completed, setCompleted] = useState(new Set());
+
   const {
     addConvo,
     setMessages,
+    getMessages,
     setConversation,
     setIsSubmitting,
     resetLatestMessage,
     invalidateConvos,
     newConversation,
   } = useChatHelpers(index, paramId);
-  const contentHandler = useContentHandler({ setMessages, setConversation });
+  const contentHandler = useContentHandler({ setMessages, getMessages });
 
   const { data: startupConfig } = useGetStartupConfig();
   const balanceQuery = useGetUserBalance({
@@ -129,6 +139,36 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
     });
 
     setIsSubmitting(false);
+  };
+
+  const syncHandler = (data: TSyncData, submission: TSubmission) => {
+    const { messages, conversationId, responseMessage } = data;
+    const { initialResponse, message } = submission;
+
+    setMessages([
+      ...messages,
+      {
+        ...initialResponse,
+        ...responseMessage,
+      },
+    ]);
+
+    let update = {} as TConversation;
+    setConversation((prevState) => {
+      update = tConvoUpdateSchema.parse({
+        ...prevState,
+        conversationId,
+      }) as TConversation;
+
+      setStorage(update);
+      return update;
+    });
+
+    if (message.parentMessageId === Constants.NO_PARENT) {
+      addConvo(update);
+    }
+
+    resetLatestMessage();
   };
 
   const createdHandler = (data: TResData, submission: TSubmission) => {
@@ -401,6 +441,9 @@ export default function useSSE(submission: TSubmission | null, index = 0) {
           overrideParentMessageId: message?.overrideParentMessageId,
         };
         createdHandler(data, { ...submission, message });
+      } else if (data.sync) {
+        /* synchronize messages to Assistants API as well as with real DB ID's */
+        syncHandler(data, { ...submission, message });
       } else if (data.type) {
         const { text, index } = data;
         if (!text) {
