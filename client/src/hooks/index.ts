@@ -3,6 +3,7 @@ export * from './Conversations';
 export * from './Files';
 export * from './Input';
 export * from './Messages';
+export * from './Plugins';
 export * from './SSE';
 
 export * from './AuthContext';
