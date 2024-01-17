@@ -13,9 +13,12 @@ import type {
   TPreset,
   UploadAvatarOptions,
   AvatarUploadResponse,
+  Assistant,
+  AssistantCreateParams,
+  AssistantUpdateParams,
 } from 'librechat-data-provider';
 
-import { dataService, MutationKeys } from 'librechat-data-provider';
+import { dataService, MutationKeys, QueryKeys } from 'librechat-data-provider';
 import { useSetRecoilState } from 'recoil';
 import store from '~/store';
 
@@ -122,4 +125,71 @@ export const useUploadAvatarMutation = (
     mutationFn: (variables: FormData) => dataService.uploadAvatar(variables),
     ...(options || {}),
   });
+};
+
+/**
+ * ASSISTANTS
+ */
+
+/**
+ * Create a new assistant
+ */
+export const useCreateAssistantMutation = (): UseMutationResult<
+  Assistant,
+  Error,
+  AssistantCreateParams
+> => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (newAssistantData: AssistantCreateParams) => dataService.createAssistant(newAssistantData),
+    {
+      onSuccess: () => {
+        // Invalidate and refetch assistants query to update list
+        queryClient.invalidateQueries([QueryKeys.assistants]);
+      },
+    },
+  );
+};
+
+/**
+ * Hook for updating an assistant
+ */
+export const useUpdateAssistantMutation = (): UseMutationResult<
+  Assistant,
+  Error,
+  { assistant_id: string; data: AssistantUpdateParams }
+> => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ assistant_id, data }: { assistant_id: string; data: AssistantUpdateParams }) =>
+      dataService.updateAssistant(assistant_id, data),
+    {
+      onSuccess: (_, { assistant_id }) => {
+        // Invalidate and refetch assistant details query
+        queryClient.invalidateQueries([QueryKeys.assistant, assistant_id]);
+        // Optionally invalidate and refetch list of assistants
+        queryClient.invalidateQueries([QueryKeys.assistants]);
+      },
+    },
+  );
+};
+
+/**
+ * Hook for deleting an assistant
+ */
+export const useDeleteAssistantMutation = (): UseMutationResult<
+  void,
+  Error,
+  { assistant_id: string }
+> => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ assistant_id }: { assistant_id: string }) => dataService.deleteAssistant(assistant_id),
+    {
+      onSuccess: () => {
+        // Invalidate and refetch assistant list query
+        queryClient.invalidateQueries([QueryKeys.assistants]);
+      },
+    },
+  );
 };
