@@ -1,6 +1,6 @@
 import { QueryKeys, dataService } from 'librechat-data-provider';
 import { UseQueryOptions, useQuery, QueryObserverResult } from '@tanstack/react-query';
-import type { TPreset, TFile } from 'librechat-data-provider';
+import type { TPreset, TFile, TPlugin } from 'librechat-data-provider';
 
 export const useGetFiles = <TData = TFile[] | boolean>(
   config?: UseQueryOptions<TFile[], unknown, TData>,
@@ -37,4 +37,12 @@ export const useGetEndpointsConfigOverride = <TData = unknown | boolean>(
       ...config,
     },
   );
+};
+
+export const useAvailableToolsQuery = (): QueryObserverResult<TPlugin[]> => {
+  return useQuery<TPlugin[]>([QueryKeys.tools], () => dataService.getAvailableTools(), {
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
 };
