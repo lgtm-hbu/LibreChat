@@ -33,6 +33,12 @@
  */
 
 /**
+ * @exports TPlugin
+ * @typedef {import('librechat-data-provider').TPlugin} TPlugin
+ * @memberof typedefs
+ */
+
+/**
  * @exports FileSources
  * @typedef {import('librechat-data-provider').FileSources} FileSources
  * @memberof typedefs
