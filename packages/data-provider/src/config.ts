@@ -266,6 +266,8 @@ export const fileConfig = {
   },
 };
 
+export const imageGenTools = new Set(['dalle', 'dall-e', 'stable-diffusion']);
+
 /**
  * Enum for cache keys.
  */
