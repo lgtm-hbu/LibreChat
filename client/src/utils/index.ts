@@ -1,5 +1,5 @@
+export * from './map';
 export * from './json';
-export * from './files';
 export * from './latex';
 export * from './presets';
 export * from './content';
