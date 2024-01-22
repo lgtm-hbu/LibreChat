@@ -16,6 +16,8 @@ import type {
   Assistant,
   AssistantCreateParams,
   AssistantUpdateParams,
+  UploadAssistantAvatarOptions,
+  AssistantAvatarVariables,
 } from 'librechat-data-provider';
 
 import { dataService, MutationKeys, QueryKeys } from 'librechat-data-provider';
@@ -198,15 +200,16 @@ export const useDeleteAssistantMutation = (): UseMutationResult<
  * Hook for uploading an assistant avatar
  */
 export const useUploadAssistantAvatarMutation = (
-  options?: UploadAvatarOptions,
+  options?: UploadAssistantAvatarOptions,
 ): UseMutationResult<
-  AvatarUploadResponse, // response data
+  Assistant, // response data
   unknown, // error
-  FormData, // request
+  AssistantAvatarVariables, // request
   unknown // context
 > => {
   return useMutation([MutationKeys.assistantAvatarUpload], {
-    mutationFn: (variables: FormData) => dataService.uploadAssistantAvatar(variables),
+    mutationFn: (variables: AssistantAvatarVariables) =>
+      dataService.uploadAssistantAvatar(variables),
     ...(options || {}),
   });
 };
