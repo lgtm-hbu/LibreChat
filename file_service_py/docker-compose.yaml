@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - MASTER_API_KEY=your_master_api_key_here
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]

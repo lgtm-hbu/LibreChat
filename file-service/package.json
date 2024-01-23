@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "dev": "bun run --hot --inspect src/index.ts"
+  },
+  "dependencies": {
+    "axios": "^1.6.5",
+    "form-data": "^4.0.0",
+    "hono": "^3.12.6"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.0.0"
+  }
+}

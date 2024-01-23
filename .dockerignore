@@ -12,6 +12,8 @@ meili_data*
 librechat*
 Dockerfile*
 docs
+file-service
+file-service-py
 
 # Ignore all hidden files
 .*

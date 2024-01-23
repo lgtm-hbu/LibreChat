@@ -131,6 +131,18 @@ module.exports = {
         },
       ],
     },
+    {
+      files: './file-service/**/*.ts',
+      overrides: [
+        {
+          files: '**/*.ts',
+          parser: '@typescript-eslint/parser',
+          parserOptions: {
+            project: './file-service/tsconfig.json',
+          },
+        },
+      ],
+    },
   ],
   settings: {
     react: {
