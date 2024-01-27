@@ -24,6 +24,9 @@ import type {
   CreateAssistantMutationOptions,
   UpdateAssistantMutationOptions,
   DeleteAssistantMutationOptions,
+  UpdateActionOptions,
+  UpdateActionVariables,
+  UpdateActionResponse,
 } from 'librechat-data-provider';
 
 import { dataService, MutationKeys, QueryKeys, defaultOrderQuery } from 'librechat-data-provider';
@@ -274,6 +277,23 @@ export const useUploadAssistantAvatarMutation = (
   return useMutation([MutationKeys.assistantAvatarUpload], {
     mutationFn: (variables: AssistantAvatarVariables) =>
       dataService.uploadAssistantAvatar(variables),
+    ...(options || {}),
+  });
+};
+
+/**
+ * Hook for updating Assistant Actions
+ */
+export const useUpdateAction = (
+  options?: UpdateActionOptions,
+): UseMutationResult<
+  UpdateActionResponse, // response data
+  unknown, // error
+  UpdateActionVariables, // request
+  unknown // context
+> => {
+  return useMutation([MutationKeys.updateAction], {
+    mutationFn: (variables: UpdateActionVariables) => dataService.updateAction(variables),
     ...(options || {}),
   });
 };
