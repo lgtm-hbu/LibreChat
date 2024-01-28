@@ -6,12 +6,14 @@ import type {
   UseInfiniteQueryOptions,
 } from '@tanstack/react-query';
 import type {
+  Action,
   TPreset,
   TFile,
   TPlugin,
   Assistant,
   AssistantListParams,
   AssistantListResponse,
+  AssistantDocument,
 } from 'librechat-data-provider';
 
 export const useGetFiles = <TData = TFile[] | boolean>(
@@ -126,6 +128,37 @@ export const useGetAssistantByIdQuery = (
       refetchOnReconnect: false,
       refetchOnMount: false,
       retry: false,
+      ...config,
+    },
+  );
+};
+
+/**
+ * Hook for retrieving user's saved Assistant Actions
+ */
+export const useGetActionsQuery = <TData = Action[]>(
+  config?: UseQueryOptions<Action[], unknown, TData>,
+): QueryObserverResult<TData> => {
+  return useQuery<Action[], unknown, TData>([QueryKeys.actions], () => dataService.getActions(), {
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    ...config,
+  });
+};
+/**
+ * Hook for retrieving user's saved Assistant Documents (metadata saved to Database)
+ */
+export const useGetAssistantDocsQuery = (
+  config?: UseQueryOptions<AssistantDocument[]>,
+): QueryObserverResult<AssistantDocument[], unknown> => {
+  return useQuery<AssistantDocument[]>(
+    [QueryKeys.assistantDocs],
+    () => dataService.getAssistantDocs(),
+    {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      refetchOnMount: false,
       ...config,
     },
   );
