@@ -93,3 +93,14 @@ export type UpdateActionOptions = {
   onMutate?: (variables: UpdateActionVariables) => void | Promise<unknown>;
   onError?: (error: unknown, variables: UpdateActionVariables, context?: unknown) => void;
 };
+
+export type DeleteActionVariables = {
+  assistant_id: string;
+  action_id: string;
+};
+
+export type DeleteActionOptions = {
+  onSuccess?: (data: void, variables: DeleteActionVariables, context?: unknown) => void;
+  onMutate?: (variables: DeleteActionVariables) => void | Promise<unknown>;
+  onError?: (error: unknown, variables: DeleteActionVariables, context?: unknown) => void;
+};

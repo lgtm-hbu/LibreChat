@@ -236,3 +236,6 @@ export const deleteFiles = async (files: f.BatchFile[]): Promise<f.DeleteFilesRe
   request.deleteWithOptions(endpoints.files(), {
     data: { files },
   });
+
+export const deleteAction = async (assistant_id: string, action_id: string): Promise<void> =>
+  request.delete(endpoints.assistants(`actions/${assistant_id}/${action_id}`));

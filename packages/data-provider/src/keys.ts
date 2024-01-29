@@ -31,4 +31,5 @@ export enum MutationKeys {
   avatarUpload = 'avatarUpload',
   assistantAvatarUpload = 'assistantAvatarUpload',
   updateAction = 'updateAction',
+  deleteAction = 'deleteAction',
 }
