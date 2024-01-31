@@ -23,6 +23,10 @@ const config = isEnabled(USE_REDIS)
   ? new Keyv({ store: keyvRedis })
   : new Keyv({ namespace: CacheKeys.CONFIG_STORE });
 
+const abortKeys = isEnabled(USE_REDIS)
+  ? new Keyv({ store: keyvRedis })
+  : new Keyv({ namespace: CacheKeys.ABORT_KEYS });
+
 const namespaces = {
   [CacheKeys.CONFIG_STORE]: config,
   pending_req,
@@ -33,6 +37,7 @@ const namespaces = {
   message_limit: createViolationInstance('message_limit'),
   token_balance: createViolationInstance('token_balance'),
   registrations: createViolationInstance('registrations'),
+  [CacheKeys.ABORT_KEYS]: abortKeys,
   logins: createViolationInstance('logins'),
 };
 
