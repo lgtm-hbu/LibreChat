@@ -177,7 +177,7 @@ export const useUpdateUserKeysMutation = (): UseMutationResult<
 };
 
 export const useDeleteConversationMutation = (
-  id?: string,
+  _options?: m.DeleteConversationOptions,
 ): UseMutationResult<
   t.TDeleteConversationResponse,
   unknown,
@@ -185,12 +185,15 @@ export const useDeleteConversationMutation = (
   unknown
 > => {
   const queryClient = useQueryClient();
+  const { onSuccess, ...options } = _options || {};
   return useMutation(
     (payload: t.TDeleteConversationRequest) => dataService.deleteConversation(payload),
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries([QueryKeys.conversation, id]);
+      ...options,
+      onSuccess: (_, variables, context) => {
+        queryClient.invalidateQueries([QueryKeys.conversation, variables.conversationId]);
         queryClient.invalidateQueries([QueryKeys.allConversations]);
+        onSuccess?.(_, variables, context);
       },
     },
   );

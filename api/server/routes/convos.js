@@ -1,7 +1,7 @@
 const express = require('express');
-const { getConvosByPage, deleteConvos } = require('~/models/Conversation');
+const { initializeClient } = require('~/server/services/Endpoints/assistant');
+const { getConvosByPage, deleteConvos, getConvo, saveConvo } = require('~/models/Conversation');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
-const { getConvo, saveConvo } = require('~/models');
 const { logger } = require('~/config');
 
 const router = express.Router();
@@ -31,9 +31,16 @@ router.get('/:conversationId', async (req, res) => {
 
 router.post('/clear', async (req, res) => {
   let filter = {};
-  const { conversationId, source } = req.body.arg;
+  const { conversationId, source, thread_id } = req.body.arg;
   if (conversationId) {
     filter = { conversationId };
+  }
+
+  if (thread_id) {
+    /** @type {{ openai: OpenAI}} */
+    const { openai } = await initializeClient({ req, res });
+    const response = await openai.beta.threads.del(thread_id);
+    logger.debug('Deleted OpenAI thread:', response);
   }
 
   // for debugging deletion source
