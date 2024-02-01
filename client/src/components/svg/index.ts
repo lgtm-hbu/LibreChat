@@ -46,3 +46,4 @@ export { default as SendMessageIcon } from './SendMessageIcon';
 export { default as UserIcon } from './UserIcon';
 export { default as ExperimentIcon } from './ExperimentIcon';
 export { default as AssistantIcon } from './AssistantIcon';
+export { default as Sparkles } from './Sparkles';
