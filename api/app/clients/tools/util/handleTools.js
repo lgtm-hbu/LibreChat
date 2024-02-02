@@ -20,6 +20,7 @@ const {
   CodeSherpa,
   CodeSherpaTools,
   CodeBrew,
+  TraversaalSearch,
 } = require('../');
 const { loadToolSuite } = require('./loadToolSuite');
 const { loadSpecs } = require('./loadSpecs');
@@ -102,6 +103,7 @@ const loadTools = async ({
     'stable-diffusion': functions ? StructuredSD : StableDiffusionAPI,
     'azure-ai-search': functions ? StructuredACS : AzureAISearch,
     CodeBrew: CodeBrew,
+    traversaal_search: TraversaalSearch,
   };
 
   const openAIApiKey = await getOpenAIKey(options, user);
