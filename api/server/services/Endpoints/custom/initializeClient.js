@@ -80,6 +80,7 @@ const initializeClient = async ({ req, res, endpointOption }) => {
 
   const getDefaultSystemAlignment = async () => {
     // do something
+    return 'my default alignment';
   };
 
   const defaultSystemAlignment = await getDefaultSystemAlignment();
@@ -89,9 +90,9 @@ const initializeClient = async ({ req, res, endpointOption }) => {
     proxy: PROXY ?? null,
     req,
     res,
-    systemAlignment: defaultSystemAlignment,
     ...customOptions,
     ...endpointOption, // system Alignment
+    systemAlignment: endpointOption.systemAlignment ?? defaultSystemAlignment,
   };
 
   const client = new OpenAIClient(apiKey, clientOptions);
