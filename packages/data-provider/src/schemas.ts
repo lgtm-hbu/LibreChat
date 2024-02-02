@@ -204,6 +204,7 @@ export const tConversationSchema = z.object({
   toneStyle: z.string().nullable().optional(),
   maxOutputTokens: z.number().optional(),
   agentOptions: tAgentOptionsSchema.nullable().optional(),
+  systemAlignment: z.string().nullable().optional(),
   /* vision */
   resendImages: z.boolean().optional(),
   imageDetail: eImageDetailSchema.optional(),
@@ -250,6 +251,7 @@ export type TPreset = z.infer<typeof tPresetSchema>;
 
 export const openAISchema = tConversationSchema
   .pick({
+    // zod documentation
     model: true,
     chatGptLabel: true,
     promptPrefix: true,
@@ -257,6 +259,7 @@ export const openAISchema = tConversationSchema
     top_p: true,
     presence_penalty: true,
     frequency_penalty: true,
+    systemAlignment: true,
     resendImages: true,
     imageDetail: true,
   })
@@ -269,6 +272,7 @@ export const openAISchema = tConversationSchema
     top_p: obj.top_p ?? 1,
     presence_penalty: obj.presence_penalty ?? 0,
     frequency_penalty: obj.frequency_penalty ?? 0,
+    systemAlignment: obj.systemAlignment ?? null,
     resendImages: obj.resendImages ?? false,
     imageDetail: obj.imageDetail ?? ImageDetail.auto,
   }))
@@ -280,6 +284,7 @@ export const openAISchema = tConversationSchema
     top_p: 1,
     presence_penalty: 0,
     frequency_penalty: 0,
+    systemAlignment: null,
     resendImages: false,
     imageDetail: ImageDetail.auto,
   }));
@@ -484,6 +489,7 @@ export const compactOpenAISchema = tConversationSchema
     top_p: true,
     presence_penalty: true,
     frequency_penalty: true,
+    systemAlignment: true,
     resendImages: true,
     imageDetail: true,
   })
@@ -503,6 +509,10 @@ export const compactOpenAISchema = tConversationSchema
     }
     if (newObj.frequency_penalty === 0) {
       delete newObj.frequency_penalty;
+    }
+    // delete if default value (null)
+    if (newObj.systemAlignment === null) {
+      delete newObj.systemAlignment;
     }
     if (newObj.resendImages !== true) {
       delete newObj.resendImages;

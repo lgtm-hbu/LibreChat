@@ -33,10 +33,12 @@ export default function Settings({ conversation, setOption, models, readonly }: 
     presence_penalty: presP,
     resendImages,
     imageDetail,
+    systemAlignment,
   } = conversation;
   const setModel = setOption('model');
   const setChatGptLabel = setOption('chatGptLabel');
   const setPromptPrefix = setOption('promptPrefix');
+  const setSystemAlignment = setOption('systemAlignment');
   const setTemperature = setOption('temperature');
   const setTopP = setOption('top_p');
   const setFreqP = setOption('frequency_penalty');
@@ -89,6 +91,24 @@ export default function Settings({ conversation, setOption, models, readonly }: 
             value={promptPrefix || ''}
             onChange={(e) => setPromptPrefix(e.target.value ?? null)}
             placeholder={localize('com_endpoint_openai_prompt_prefix_placeholder')}
+            className={cn(
+              defaultTextProps,
+              'dark:bg-gray-700 dark:hover:bg-gray-700/60 dark:focus:bg-gray-700',
+              'flex max-h-[138px] min-h-[100px] w-full resize-none px-3 py-2 ',
+            )}
+          />
+        </div>
+        <div className="grid w-full items-center gap-2">
+          <Label htmlFor="systemAlignment" className="text-left text-sm font-medium">
+            {'System Alignment'}{' '}
+            <small className="opacity-40">({localize('com_endpoint_default_blank')})</small>
+          </Label>
+          <TextareaAutosize
+            id="systemAlignment"
+            disabled={readonly}
+            value={systemAlignment || ''}
+            onChange={(e) => setSystemAlignment(e.target.value ?? null)}
+            placeholder={'system alignment placeholder'}
             className={cn(
               defaultTextProps,
               'dark:bg-gray-700 dark:hover:bg-gray-700/60 dark:focus:bg-gray-700',

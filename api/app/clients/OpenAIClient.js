@@ -351,6 +351,7 @@ class OpenAIClient extends BaseClient {
       chatGptLabel: this.options.chatGptLabel,
       promptPrefix: this.options.promptPrefix,
       resendImages: this.options.resendImages,
+      systemAlignment: this.options.systemAlignment,
       imageDetail: this.options.imageDetail,
       ...this.modelOptions,
     };
@@ -450,7 +451,8 @@ class OpenAIClient extends BaseClient {
     let tokenCountMap;
     let promptTokens;
 
-    promptPrefix = (promptPrefix || this.options.promptPrefix || '').trim();
+    promptPrefix =
+      this.options.systemAlignment + (promptPrefix || this.options.promptPrefix || '').trim();
     if (promptPrefix) {
       promptPrefix = `Instructions:\n${promptPrefix}`;
       instructions = {

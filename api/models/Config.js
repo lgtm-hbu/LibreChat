@@ -67,6 +67,14 @@ configSchema.statics.updateByTag = async function (tag, update) {
 const Config = mongoose.models.Config || mongoose.model('Config', configSchema);
 
 module.exports = {
+  getAdminConfig: async () => {
+    try {
+      return await Config.find({ _id: 'admin' }).lean();
+    } catch (error) {
+      logger.error('Error getting configs', error);
+      return { config: 'Error getting configs' };
+    }
+  },
   getConfigs: async (filter) => {
     try {
       return await Config.find(filter).lean();

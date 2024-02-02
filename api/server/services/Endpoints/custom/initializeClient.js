@@ -78,13 +78,20 @@ const initializeClient = async ({ req, res, endpointOption }) => {
     throw new Error(`${endpoint} Base URL not provided.`);
   }
 
+  const getDefaultSystemAlignment = async () => {
+    // do something
+  };
+
+  const defaultSystemAlignment = await getDefaultSystemAlignment();
+
   const clientOptions = {
     reverseProxyUrl: baseURL ?? null,
     proxy: PROXY ?? null,
     req,
     res,
+    systemAlignment: defaultSystemAlignment,
     ...customOptions,
-    ...endpointOption,
+    ...endpointOption, // system Alignment
   };
 
   const client = new OpenAIClient(apiKey, clientOptions);

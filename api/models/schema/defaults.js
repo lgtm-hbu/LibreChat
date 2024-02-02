@@ -84,6 +84,9 @@ const conversationPreset = {
     type: String,
     // default: null,
   },
+  systemAlignment: {
+    type: String,
+  },
   resendImages: {
     type: Boolean,
   },
