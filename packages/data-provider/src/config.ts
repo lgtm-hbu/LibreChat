@@ -6,6 +6,8 @@ import { FileSources } from './types/files';
 
 export const defaultSocialLogins = ['google', 'facebook', 'openid', 'github', 'discord'];
 
+export const slowerModels = new Set(['gpt-4']);
+
 export const fileSourceSchema = z.nativeEnum(FileSources);
 
 export const modelConfigSchema = z

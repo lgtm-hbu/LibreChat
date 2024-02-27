@@ -2,6 +2,7 @@ const OpenAI = require('openai');
 const { HttpsProxyAgent } = require('https-proxy-agent');
 const {
   ImageDetail,
+  slowerModels,
   EModelEndpoint,
   resolveHeaders,
   ImageDetailCost,
@@ -1149,10 +1150,13 @@ ${convo}
             }
           });
 
+        const delay = slowerModels.has(modelOptions.model) ? 11 : 7;
         for await (const chunk of stream) {
           const token = chunk.choices[0]?.delta?.content || '';
           intermediateReply += token;
-          onProgress(token);
+          await this.generateTextStream(token, onProgress, {
+            delay,
+          });
           if (abortController.signal.aborted) {
             stream.controller.abort();
             break;
