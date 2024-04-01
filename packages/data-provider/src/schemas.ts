@@ -244,6 +244,7 @@ export const tConversationSchema = z.object({
   instructions: z.string().optional(),
   /** Used to overwrite active conversation settings when saving a Preset */
   presetOverride: z.record(z.unknown()).optional(),
+  testSwitch: z.boolean().optional(),
 });
 
 export const tPresetSchema = tConversationSchema
@@ -295,6 +296,7 @@ export const openAISchema = tConversationSchema
     frequency_penalty: true,
     resendFiles: true,
     imageDetail: true,
+    testSwitch: true,
   })
   .transform((obj) => ({
     ...obj,
@@ -307,6 +309,7 @@ export const openAISchema = tConversationSchema
     frequency_penalty: obj.frequency_penalty ?? 0,
     resendFiles: typeof obj.resendFiles === 'boolean' ? obj.resendFiles : true,
     imageDetail: obj.imageDetail ?? ImageDetail.auto,
+    testSwitch: typeof obj.testSwitch === 'boolean' ? obj.testSwitch : false,
   }))
   .catch(() => ({
     model: 'gpt-3.5-turbo',
@@ -318,6 +321,7 @@ export const openAISchema = tConversationSchema
     frequency_penalty: 0,
     resendFiles: true,
     imageDetail: ImageDetail.auto,
+    testSwitch: false,
   }));
 
 export const googleSchema = tConversationSchema
@@ -526,6 +530,7 @@ export const compactOpenAISchema = tConversationSchema
     frequency_penalty: true,
     resendFiles: true,
     imageDetail: true,
+    testSwitch: true,
   })
   .transform((obj: Partial<TConversation>) => {
     const newObj: Partial<TConversation> = { ...obj };
@@ -546,6 +551,9 @@ export const compactOpenAISchema = tConversationSchema
     }
     if (newObj.imageDetail === ImageDetail.auto) {
       delete newObj.imageDetail;
+    }
+    if (newObj.testSwitch === false) {
+      delete newObj.testSwitch;
     }
 
     return removeNullishValues(newObj);

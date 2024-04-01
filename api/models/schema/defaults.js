@@ -88,6 +88,10 @@ const conversationPreset = {
   instructions: {
     type: String,
   },
+  /* custom */
+  testSwitch: {
+    type: Boolean,
+  },
 };
 
 const agentOptions = {

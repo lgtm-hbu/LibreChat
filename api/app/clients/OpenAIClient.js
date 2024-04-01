@@ -376,6 +376,7 @@ class OpenAIClient extends BaseClient {
       chatGptLabel: this.options.chatGptLabel,
       promptPrefix: this.options.promptPrefix,
       resendFiles: this.options.resendFiles,
+      testSwitch: this.options.testSwitch,
       imageDetail: this.options.imageDetail,
       ...this.modelOptions,
     };

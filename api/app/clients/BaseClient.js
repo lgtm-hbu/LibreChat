@@ -443,7 +443,15 @@ class BaseClient {
       });
     }
 
-    const completion = await this.sendCompletion(payload, opts);
+    /* Completion starts here */
+    let completion = await this.sendCompletion(payload, opts);
+
+    if (this.options.endpoint === 'groq' && this.options.testSwitch) {
+      /* do something */
+      console.log(`test switch: ${this.options.testSwitch}`);
+      completion += '\n\nTEST SWITCH ACTIVATED';
+    }
+
     this.abortController.requestCompleted = true;
 
     const responseMessage = {

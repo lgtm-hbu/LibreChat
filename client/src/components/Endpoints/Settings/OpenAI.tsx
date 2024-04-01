@@ -29,6 +29,7 @@ export default function Settings({ conversation, setOption, models, readonly }: 
     frequency_penalty: freqP,
     presence_penalty: presP,
     resendFiles,
+    testSwitch,
     imageDetail,
   } = conversation ?? {};
   const [setChatGptLabel, chatGptLabelValue] = useDebouncedInput({
@@ -68,6 +69,7 @@ export default function Settings({ conversation, setOption, models, readonly }: 
 
   const setModel = setOption('model');
   const setResendFiles = setOption('resendFiles');
+  const setTestSwitch = setOption('testSwitch');
   const setImageDetail = setOption('imageDetail');
 
   const optionEndpoint = endpointType ?? endpoint;
@@ -332,6 +334,30 @@ export default function Settings({ conversation, setOption, models, readonly }: 
                   step={1}
                 />
                 <OptionHover endpoint={optionEndpoint ?? ''} type="detail" side={ESide.Bottom} />
+              </HoverCardTrigger>
+            </HoverCard>
+          </div>
+          <div className="flex w-full justify-between gap-2">
+            <HoverCard openDelay={500}>
+              <HoverCardTrigger>
+                <label
+                  htmlFor="test-switch"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-gray-50"
+                >
+                  <small>{'TEST SWITCH'}</small>
+                </label>
+                <Switch
+                  id="test-switch"
+                  checked={testSwitch ?? true}
+                  onCheckedChange={(checked: boolean) => setTestSwitch(checked)}
+                  disabled={readonly}
+                  className="flex"
+                />
+                <OptionHover
+                  endpoint={optionEndpoint ?? ''}
+                  type="test-switch"
+                  side={ESide.Bottom}
+                />
               </HoverCardTrigger>
             </HoverCard>
           </div>

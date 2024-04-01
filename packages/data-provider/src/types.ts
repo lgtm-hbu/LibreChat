@@ -16,6 +16,7 @@ export type TEndpointOption = {
   endpoint: EModelEndpoint;
   endpointType?: EModelEndpoint;
   modelDisplayLabel?: string;
+  testSwitch?: boolean;
   resendFiles?: boolean;
   imageDetail?: ImageDetail;
   model?: string | null;
