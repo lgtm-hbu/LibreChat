@@ -59,6 +59,7 @@ router.post('/', validateModel, buildEndpointOption, setHeaders, async (req, res
   const {
     text,
     model,
+    endpoint,
     files = [],
     promptPrefix,
     assistant_id,
@@ -70,7 +71,7 @@ router.post('/', validateModel, buildEndpointOption, setHeaders, async (req, res
   } = req.body;
 
   /** @type {Partial<TAssistantEndpoint>} */
-  const assistantsConfig = req.app.locals?.[EModelEndpoint.assistants];
+  const assistantsConfig = req.app.locals?.[endpoint];
 
   if (assistantsConfig) {
     const { supportedIds, excludedIds } = assistantsConfig;
@@ -138,7 +139,7 @@ router.post('/', validateModel, buildEndpointOption, setHeaders, async (req, res
       user: req.user.id,
       shouldSaveMessage: false,
       messageId: responseMessageId,
-      endpoint: EModelEndpoint.assistants,
+      endpoint,
     };
 
     if (error.message === 'Run cancelled') {
@@ -467,6 +468,7 @@ router.post('/', validateModel, buildEndpointOption, setHeaders, async (req, res
         assistant_id,
         thread_id,
         model: assistant_id,
+        endpoint,
       };
 
       previousMessages.push(requestMessage);
@@ -476,7 +478,7 @@ router.post('/', validateModel, buildEndpointOption, setHeaders, async (req, res
 
       conversation = {
         conversationId,
-        endpoint: EModelEndpoint.assistants,
+        endpoint,
         promptPrefix: promptPrefix,
         instructions: instructions,
         assistant_id,
@@ -603,6 +605,7 @@ router.post('/', validateModel, buildEndpointOption, setHeaders, async (req, res
       assistant_id,
       thread_id,
       model: assistant_id,
+      endpoint,
     };
 
     sendMessage(res, {

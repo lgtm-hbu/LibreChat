@@ -30,7 +30,7 @@ async function loadConfigModels(req) {
   }
 
   if (azureEndpoint?.assistants && azureConfig.assistantModels) {
-    modelsConfig[EModelEndpoint.assistants] = azureConfig.assistantModels;
+    modelsConfig[EModelEndpoint.assistantsAzure] = azureConfig.assistantModels;
   }
 
   if (!Array.isArray(endpoints[EModelEndpoint.custom])) {

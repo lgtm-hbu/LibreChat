@@ -3,7 +3,6 @@ const { v4 } = require('uuid');
 const {
   Constants,
   ContentTypes,
-  EModelEndpoint,
   AnnotationTypes,
   defaultOrderQuery,
 } = require('librechat-data-provider');
@@ -50,6 +49,7 @@ async function initThread({ openai, body, thread_id: _thread_id }) {
  * @param {string} params.assistant_id - The current assistant Id.
  * @param {string} params.thread_id - The thread Id.
  * @param {string} params.conversationId - The message's conversationId
+ * @param {string} params.endpoint - The conversation endpoint
  * @param {string} [params.parentMessageId] - Optional if initial message.
  * Defaults to Constants.NO_PARENT.
  * @param {string} [params.instructions] - Optional: from preset for `instructions` field.
@@ -82,7 +82,7 @@ async function saveUserMessage(params) {
 
   const userMessage = {
     user: params.user,
-    endpoint: EModelEndpoint.assistants,
+    endpoint: params.endpoint,
     messageId: params.messageId,
     conversationId: params.conversationId,
     parentMessageId: params.parentMessageId ?? Constants.NO_PARENT,
@@ -96,7 +96,7 @@ async function saveUserMessage(params) {
   };
 
   const convo = {
-    endpoint: EModelEndpoint.assistants,
+    endpoint: params.endpoint,
     conversationId: params.conversationId,
     promptPrefix: params.promptPrefix,
     instructions: params.instructions,
@@ -126,6 +126,7 @@ async function saveUserMessage(params) {
  * @param {string} params.model - The model used by the assistant.
  * @param {ContentPart[]} params.content - The message content parts.
  * @param {string} params.conversationId - The message's conversationId
+ * @param {string} params.endpoint - The conversation endpoint
  * @param {string} params.parentMessageId - The latest user message that triggered this response.
  * @param {string} [params.instructions] - Optional: from preset for `instructions` field.
  * Overrides the instructions of the assistant.
@@ -145,7 +146,7 @@ async function saveAssistantMessage(params) {
 
   const message = await recordMessage({
     user: params.user,
-    endpoint: EModelEndpoint.assistants,
+    endpoint: params.endpoint,
     messageId: params.messageId,
     conversationId: params.conversationId,
     parentMessageId: params.parentMessageId,
@@ -160,7 +161,7 @@ async function saveAssistantMessage(params) {
   });
 
   await saveConvo(params.user, {
-    endpoint: EModelEndpoint.assistants,
+    endpoint: params.endpoint,
     conversationId: params.conversationId,
     promptPrefix: params.promptPrefix,
     instructions: params.instructions,
@@ -290,7 +291,7 @@ async function syncMessages({
         thread_id,
         conversationId,
         messageId: v4(),
-        endpoint: EModelEndpoint.assistants,
+        endpoint: dbMessage.endpoint,
         parentMessageId: lastMessage ? lastMessage.messageId : Constants.NO_PARENT,
         role: apiMessage.role,
         isCreatedByUser: apiMessage.role === 'user',
