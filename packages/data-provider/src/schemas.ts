@@ -22,7 +22,7 @@ export enum EModelEndpoint {
   gptPlugins = 'gptPlugins',
   anthropic = 'anthropic',
   assistants = 'assistants',
-  azureAssistants = 'azureAssistants',
+  assistantsAzure = 'assistantsAzure',
   custom = 'custom',
 }
 

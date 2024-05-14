@@ -287,7 +287,7 @@ export const configSchema = z.object({
   endpoints: z
     .object({
       [EModelEndpoint.azureOpenAI]: azureEndpointSchema.optional(),
-      [EModelEndpoint.azureAssistants]: assistantEndpointSchema.optional(),
+      [EModelEndpoint.assistantsAzure]: assistantEndpointSchema.optional(),
       [EModelEndpoint.assistants]: assistantEndpointSchema.optional(),
       custom: z.array(endpointSchema.partial()).optional(),
     })
@@ -325,7 +325,7 @@ export enum FetchTokenConfig {
 export const defaultEndpoints: EModelEndpoint[] = [
   EModelEndpoint.openAI,
   EModelEndpoint.assistants,
-  EModelEndpoint.azureAssistants,
+  EModelEndpoint.assistantsAzure,
   EModelEndpoint.azureOpenAI,
   EModelEndpoint.bingAI,
   EModelEndpoint.chatGPTBrowser,
@@ -338,7 +338,7 @@ export const defaultEndpoints: EModelEndpoint[] = [
 export const alternateName = {
   [EModelEndpoint.openAI]: 'OpenAI',
   [EModelEndpoint.assistants]: 'Assistants',
-  [EModelEndpoint.azureAssistants]: 'Azure Assistants',
+  [EModelEndpoint.assistantsAzure]: 'Azure Assistants',
   [EModelEndpoint.azureOpenAI]: 'Azure OpenAI',
   [EModelEndpoint.bingAI]: 'Bing',
   [EModelEndpoint.chatGPTBrowser]: 'ChatGPT',
@@ -367,7 +367,7 @@ const sharedOpenAIModels = [
 ];
 
 export const defaultModels = {
-  [EModelEndpoint.azureAssistants]: sharedOpenAIModels,
+  [EModelEndpoint.assistantsAzure]: sharedOpenAIModels,
   [EModelEndpoint.assistants]: ['gpt-4o', ...sharedOpenAIModels],
   [EModelEndpoint.google]: [
     'gemini-pro',
@@ -433,7 +433,7 @@ export const EndpointURLs: { [key in EModelEndpoint]: string } = {
   [EModelEndpoint.gptPlugins]: `/api/ask/${EModelEndpoint.gptPlugins}`,
   [EModelEndpoint.azureOpenAI]: `/api/ask/${EModelEndpoint.azureOpenAI}`,
   [EModelEndpoint.chatGPTBrowser]: `/api/ask/${EModelEndpoint.chatGPTBrowser}`,
-  [EModelEndpoint.azureAssistants]: '/api/assistants/v1/chat',
+  [EModelEndpoint.assistantsAzure]: '/api/assistants/v1/chat',
   [EModelEndpoint.assistants]: '/api/assistants/v2/chat',
 };
 
@@ -452,7 +452,7 @@ export const supportsBalanceCheck = {
   [EModelEndpoint.anthropic]: true,
   [EModelEndpoint.gptPlugins]: true,
   [EModelEndpoint.assistants]: true,
-  [EModelEndpoint.azureAssistants]: true,
+  [EModelEndpoint.assistantsAzure]: true,
   [EModelEndpoint.azureOpenAI]: true,
 };
 
