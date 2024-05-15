@@ -83,9 +83,9 @@ export const assistants = ({
 }: {
   path?: string;
   options?: object;
-  version: string;
+  version: number | string;
 }) => {
-  let url = `/api/assistants/${version}`;
+  let url = `/api/assistants/v${version}`;
 
   if (path) {
     url += `/${path}`;

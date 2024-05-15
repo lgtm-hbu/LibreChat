@@ -49,7 +49,7 @@ export type AssistantCreateParams = {
   metadata?: Metadata | null;
   name?: string | null;
   tools?: Array<FunctionTool | string>;
-  version: string;
+  version: number | string;
 };
 
 export type AssistantUpdateParams = {
@@ -318,7 +318,7 @@ export type Action = {
   type?: string;
   settings?: Record<string, unknown>;
   metadata: ActionMetadata;
-  version: string;
+  version: number | string;
 };
 
 export type AssistantAvatar = {

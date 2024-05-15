@@ -150,7 +150,7 @@ export const getAssistantById = ({
   version,
 }: {
   assistant_id: string;
-  version: string;
+  version: number | string | number;
 }): Promise<a.Assistant> => {
   return request.get(
     endpoints.assistants({
@@ -167,7 +167,7 @@ export const updateAssistant = ({
 }: {
   assistant_id: string;
   data: a.AssistantUpdateParams;
-  version: string;
+  version: number | string;
 }): Promise<a.Assistant> => {
   return request.patch(
     endpoints.assistants({
@@ -185,7 +185,7 @@ export const deleteAssistant = ({
 }: {
   assistant_id: string;
   model: string;
-  version: string;
+  version: number | string;
 }): Promise<void> => {
   return request.delete(
     endpoints.assistants({
@@ -198,7 +198,7 @@ export const deleteAssistant = ({
 
 export const listAssistants = (
   params: a.AssistantListParams,
-  version: string,
+  version: number | string,
 ): Promise<a.AssistantListResponse> => {
   return request.get(
     endpoints.assistants({
@@ -208,7 +208,7 @@ export const listAssistants = (
   );
 };
 
-export function getAssistantDocs(version: string): Promise<a.AssistantDocument[]> {
+export function getAssistantDocs(version: number | string): Promise<a.AssistantDocument[]> {
   return request.get(
     endpoints.assistants({
       path: 'documents',
@@ -219,7 +219,7 @@ export function getAssistantDocs(version: string): Promise<a.AssistantDocument[]
 
 /* Tools */
 
-export const getAvailableTools = (version: string): Promise<s.TPlugin[]> => {
+export const getAvailableTools = (version: number | string): Promise<s.TPlugin[]> => {
   return request.get(
     endpoints.assistants({
       path: 'tools',
@@ -313,7 +313,7 @@ export const updateAction = (data: m.UpdateActionVariables): Promise<m.UpdateAct
   );
 };
 
-export function getActions(version: string): Promise<a.Action[]> {
+export function getActions(version: number | string): Promise<a.Action[]> {
   return request.get(
     endpoints.assistants({
       path: 'actions',
@@ -331,7 +331,7 @@ export const deleteAction = async ({
   assistant_id: string;
   action_id: string;
   model: string;
-  version: string;
+  version: number | string;
 }): Promise<void> =>
   request.delete(
     endpoints.assistants({
