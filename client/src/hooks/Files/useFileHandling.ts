@@ -146,10 +146,11 @@ const useFileHandling = (params?: UseFileHandling) => {
     }
 
     if (
-      endpoint === EModelEndpoint.assistants &&
+      endpoint.toLowerCase().endsWith(EModelEndpoint.assistants) &&
       !formData.get('assistant_id') &&
       conversation?.assistant_id
     ) {
+      formData.append('endpoint', endpoint);
       formData.append('assistant_id', conversation.assistant_id);
       formData.append('model', conversation?.model ?? '');
       formData.append('message_file', 'true');

@@ -146,15 +146,18 @@ export const createAssistant = ({
 };
 
 export const getAssistantById = ({
+  endpoint,
   assistant_id,
   version,
 }: {
+  endpoint: s.AssistantsEndpoint;
   assistant_id: string;
   version: number | string | number;
 }): Promise<a.Assistant> => {
   return request.get(
     endpoints.assistants({
       path: assistant_id,
+      endpoint,
       version,
     }),
   );
@@ -181,16 +184,13 @@ export const updateAssistant = ({
 export const deleteAssistant = ({
   assistant_id,
   model,
+  endpoint,
   version,
-}: {
-  assistant_id: string;
-  model: string;
-  version: number | string;
-}): Promise<void> => {
+}: m.DeleteAssistantBody & { version: number | string }): Promise<void> => {
   return request.delete(
     endpoints.assistants({
       path: assistant_id,
-      options: { model },
+      options: { model, endpoint },
       version,
     }),
   );
@@ -208,21 +208,32 @@ export const listAssistants = (
   );
 };
 
-export function getAssistantDocs(version: number | string): Promise<a.AssistantDocument[]> {
+export function getAssistantDocs({
+  endpoint,
+  version,
+}: {
+  endpoint: s.AssistantsEndpoint;
+  version: number | string;
+}): Promise<a.AssistantDocument[]> {
   return request.get(
     endpoints.assistants({
       path: 'documents',
       version,
+      endpoint,
     }),
   );
 }
 
 /* Tools */
 
-export const getAvailableTools = (version: number | string): Promise<s.TPlugin[]> => {
+export const getAvailableTools = (
+  version: number | string,
+  endpoint: s.AssistantsEndpoint,
+): Promise<s.TPlugin[]> => {
   return request.get(
     endpoints.assistants({
       path: 'tools',
+      endpoint,
       version,
     }),
   );
@@ -276,7 +287,7 @@ export const uploadAssistantAvatar = (data: m.AssistantAvatarVariables): Promise
   return request.postMultiPart(
     endpoints.assistants({
       path: `avatar/${data.assistant_id}`,
-      options: { model: data.model },
+      options: { model: data.model, endpoint: data.endpoint },
       version: data.version,
     }),
     data.formData,
@@ -313,11 +324,18 @@ export const updateAction = (data: m.UpdateActionVariables): Promise<m.UpdateAct
   );
 };
 
-export function getActions(version: number | string): Promise<a.Action[]> {
+export function getActions({
+  endpoint,
+  version,
+}: {
+  endpoint: s.AssistantsEndpoint;
+  version: number | string;
+}): Promise<a.Action[]> {
   return request.get(
     endpoints.assistants({
       path: 'actions',
       version,
+      endpoint,
     }),
   );
 }
@@ -327,16 +345,13 @@ export const deleteAction = async ({
   action_id,
   model,
   version,
-}: {
-  assistant_id: string;
-  action_id: string;
-  model: string;
-  version: number | string;
-}): Promise<void> =>
+  endpoint,
+}: m.DeleteActionVariables & { version: number | string }): Promise<void> =>
   request.delete(
     endpoints.assistants({
       path: `actions/${assistant_id}/${action_id}/${model}`,
       version,
+      endpoint,
     }),
   );
 

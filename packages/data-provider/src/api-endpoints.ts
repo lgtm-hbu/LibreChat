@@ -1,3 +1,5 @@
+import type { AssistantsEndpoint } from './schemas';
+
 export const user = () => '/api/user';
 
 export const balance = () => '/api/balance';
@@ -80,15 +82,24 @@ export const assistants = ({
   path,
   options,
   version,
+  endpoint,
 }: {
   path?: string;
   options?: object;
+  endpoint?: AssistantsEndpoint;
   version: number | string;
 }) => {
   let url = `/api/assistants/v${version}`;
 
   if (path) {
     url += `/${path}`;
+  }
+
+  if (endpoint) {
+    options = {
+      ...(options ?? {}),
+      endpoint,
+    };
   }
 
   if (options && Object.keys(options).length > 0) {

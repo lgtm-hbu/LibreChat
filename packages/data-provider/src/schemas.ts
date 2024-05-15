@@ -26,6 +26,8 @@ export enum EModelEndpoint {
   custom = 'custom',
 }
 
+export type AssistantsEndpoint = EModelEndpoint.assistants | EModelEndpoint.azureAssistants;
+
 export enum ImageDetail {
   low = 'low',
   auto = 'auto',
