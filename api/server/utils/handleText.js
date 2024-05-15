@@ -1,4 +1,9 @@
-const { Capabilities, defaultRetrievalModels } = require('librechat-data-provider');
+const {
+  Capabilities,
+  defaultRetrievalModels,
+  EModelEndpoint,
+  defaultAssistantsVersion,
+} = require('librechat-data-provider');
 const { getCitations, citeText } = require('./citations');
 const partialRight = require('lodash/partialRight');
 const { sendMessage } = require('./streamResponse');
@@ -154,9 +159,10 @@ const isUserProvided = (value) => value === 'user_provided';
  * Generate the configuration for a given key and base URL.
  * @param {string} key
  * @param {string} baseURL
+ * @param {string} endpoint
  * @returns {boolean | { userProvide: boolean, userProvideURL?: boolean }}
  */
-function generateConfig(key, baseURL, assistants = false) {
+function generateConfig(key, baseURL, endpoint) {
   if (!key) {
     return false;
   }
@@ -168,6 +174,8 @@ function generateConfig(key, baseURL, assistants = false) {
     config.userProvideURL = isUserProvided(baseURL);
   }
 
+  const assistants = endpoint && endpoint.toLowerCase().endsWith(EModelEndpoint.assistants);
+
   if (assistants) {
     config.retrievalModels = defaultRetrievalModels;
     config.capabilities = [
@@ -177,6 +185,12 @@ function generateConfig(key, baseURL, assistants = false) {
       Capabilities.actions,
       Capabilities.tools,
     ];
+  }
+
+  if (assistants && endpoint === EModelEndpoint.azureAssistants) {
+    config.version = defaultAssistantsVersion.azureAssistants;
+  } else if (assistants) {
+    config.version = defaultAssistantsVersion.assistants;
   }
 
   return config;

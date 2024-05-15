@@ -35,11 +35,15 @@ module.exports = {
     [EModelEndpoint.chatGPTBrowser]: generateConfig(chatGPTToken),
     [EModelEndpoint.openAI]: generateConfig(openAIApiKey, OPENAI_REVERSE_PROXY),
     [EModelEndpoint.azureOpenAI]: generateConfig(azureOpenAIApiKey, AZURE_OPENAI_BASEURL),
-    [EModelEndpoint.assistants]: generateConfig(assistantsApiKey, ASSISTANTS_BASE_URL, true),
+    [EModelEndpoint.assistants]: generateConfig(
+      assistantsApiKey,
+      ASSISTANTS_BASE_URL,
+      EModelEndpoint.assistants,
+    ),
     [EModelEndpoint.azureAssistants]: generateConfig(
       azureAssistantsApiKey,
       AZURE_ASSISTANTS_BASE_URL,
-      true,
+      EModelEndpoint.azureAssistants,
     ),
   },
 };

@@ -129,11 +129,17 @@ export enum Capabilities {
   tools = 'tools',
 }
 
+export const defaultAssistantsVersion = {
+  [EModelEndpoint.assistants]: 2,
+  [EModelEndpoint.azureAssistants]: 1,
+};
+
 export const assistantEndpointSchema = z.object({
   /* assistants specific */
   disableBuilder: z.boolean().optional(),
   pollIntervalMs: z.number().optional(),
   timeoutMs: z.number().optional(),
+  version: z.union([z.string(), z.number()]).default(2),
   supportedIds: z.array(z.string()).min(1).optional(),
   excludedIds: z.array(z.string()).min(1).optional(),
   retrievalModels: z.array(z.string()).min(1).optional().default(defaultRetrievalModels),
