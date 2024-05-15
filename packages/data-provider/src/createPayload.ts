@@ -12,7 +12,7 @@ export default function createPayload(submission: TSubmission) {
 
   let server = EndpointURLs[endpointType ?? endpoint];
 
-  if (isEdited && endpoint.includes(EModelEndpoint.assistants)) {
+  if (isEdited && endpoint.toLowerCase().endsWith(EModelEndpoint.assistants)) {
     server += '/modify';
   } else if (isEdited) {
     server = server.replace('/ask/', '/edit/');

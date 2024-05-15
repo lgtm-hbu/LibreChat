@@ -7,7 +7,7 @@ export const supportsFiles = {
   [EModelEndpoint.openAI]: true,
   [EModelEndpoint.google]: true,
   [EModelEndpoint.assistants]: true,
-  [EModelEndpoint.assistantsAzure]: true,
+  [EModelEndpoint.azureAssistants]: true,
   [EModelEndpoint.azureOpenAI]: true,
   [EModelEndpoint.anthropic]: true,
   [EModelEndpoint.custom]: true,
@@ -165,7 +165,7 @@ const assistantsFileConfig = {
 export const fileConfig = {
   endpoints: {
     [EModelEndpoint.assistants]: assistantsFileConfig,
-    [EModelEndpoint.assistantsAzure]: assistantsFileConfig,
+    [EModelEndpoint.azureAssistants]: assistantsFileConfig,
     default: {
       fileLimit: 10,
       fileSizeLimit: defaultSizeLimit,

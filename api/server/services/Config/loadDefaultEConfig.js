@@ -9,7 +9,7 @@ const { config } = require('./EndpointService');
  */
 async function loadDefaultEndpointsConfig(req) {
   const { google, gptPlugins } = await loadAsyncEndpoints(req);
-  const { openAI, assistants, assistantsAzure, bingAI, anthropic, azureOpenAI, chatGPTBrowser } =
+  const { openAI, assistants, azureAssistants, bingAI, anthropic, azureOpenAI, chatGPTBrowser } =
     config;
 
   const enabledEndpoints = getEnabledEndpoints();
@@ -17,7 +17,7 @@ async function loadDefaultEndpointsConfig(req) {
   const endpointConfig = {
     [EModelEndpoint.openAI]: openAI,
     [EModelEndpoint.assistants]: assistants,
-    [EModelEndpoint.assistantsAzure]: assistantsAzure,
+    [EModelEndpoint.azureAssistants]: azureAssistants,
     [EModelEndpoint.azureOpenAI]: azureOpenAI,
     [EModelEndpoint.google]: google,
     [EModelEndpoint.bingAI]: bingAI,

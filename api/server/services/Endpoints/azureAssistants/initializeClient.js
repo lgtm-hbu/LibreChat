@@ -26,12 +26,12 @@ const initializeClient = async ({ req, res, endpointOption, initAppClient = fals
   if (userProvidesKey || userProvidesURL) {
     const expiresAt = await getUserKeyExpiry({
       userId: req.user.id,
-      name: EModelEndpoint.assistantsAzure,
+      name: EModelEndpoint.azureAssistants,
     });
-    checkUserKeyExpiry(expiresAt, EModelEndpoint.assistantsAzure);
+    checkUserKeyExpiry(expiresAt, EModelEndpoint.azureAssistants);
     userValues = await getUserKeyValues({
       userId: req.user.id,
-      name: EModelEndpoint.assistantsAzure,
+      name: EModelEndpoint.azureAssistants,
     });
   }
 

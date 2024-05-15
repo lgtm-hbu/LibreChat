@@ -67,7 +67,7 @@ export type AssistantListParams = {
   before?: string | null;
   after?: string | null;
   order?: 'asc' | 'desc';
-  endpoint: EModelEndpoint.assistants | EModelEndpoint.assistantsAzure;
+  endpoint: EModelEndpoint.assistants | EModelEndpoint.azureAssistants;
 };
 
 export type AssistantListResponse = {

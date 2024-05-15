@@ -28,14 +28,14 @@ async function endpointController(req, res) {
   }
 
   if (
-    mergedConfig[EModelEndpoint.assistantsAzure] &&
-    req.app.locals?.[EModelEndpoint.assistantsAzure]
+    mergedConfig[EModelEndpoint.azureAssistants] &&
+    req.app.locals?.[EModelEndpoint.azureAssistants]
   ) {
     const { disableBuilder, retrievalModels, capabilities, ..._rest } =
-      req.app.locals[EModelEndpoint.assistantsAzure];
+      req.app.locals[EModelEndpoint.azureAssistants];
 
-    mergedConfig[EModelEndpoint.assistantsAzure] = {
-      ...mergedConfig[EModelEndpoint.assistantsAzure],
+    mergedConfig[EModelEndpoint.azureAssistants] = {
+      ...mergedConfig[EModelEndpoint.azureAssistants],
       retrievalModels,
       disableBuilder,
       capabilities,

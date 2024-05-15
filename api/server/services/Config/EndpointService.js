@@ -3,7 +3,7 @@ const { isUserProvided, generateConfig } = require('~/server/utils');
 
 const {
   OPENAI_API_KEY: openAIApiKey,
-  AZURE_ASSISTANTS_API_KEY: assistantsAzureApiKey,
+  AZURE_ASSISTANTS_API_KEY: azureAssistantsApiKey,
   ASSISTANTS_API_KEY: assistantsApiKey,
   AZURE_API_KEY: azureOpenAIApiKey,
   ANTHROPIC_API_KEY: anthropicApiKey,
@@ -36,8 +36,8 @@ module.exports = {
     [EModelEndpoint.openAI]: generateConfig(openAIApiKey, OPENAI_REVERSE_PROXY),
     [EModelEndpoint.azureOpenAI]: generateConfig(azureOpenAIApiKey, AZURE_OPENAI_BASEURL),
     [EModelEndpoint.assistants]: generateConfig(assistantsApiKey, ASSISTANTS_BASE_URL, true),
-    [EModelEndpoint.assistantsAzure]: generateConfig(
-      assistantsAzureApiKey,
+    [EModelEndpoint.azureAssistants]: generateConfig(
+      azureAssistantsApiKey,
       AZURE_ASSISTANTS_BASE_URL,
       true,
     ),

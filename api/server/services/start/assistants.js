@@ -9,7 +9,7 @@ const { logger } = require('~/config');
  * Sets up the minimum, default Assistants configuration if Azure OpenAI Assistants option is enabled.
  * @returns {Partial<TAssistantEndpoint>} The Assistants endpoint configuration.
  */
-function assistantsAzureDefaults() {
+function azureAssistantsDefaults() {
   return {
     capabilities: [Capabilities.tools, Capabilities.actions, Capabilities.code_interpreter],
   };
@@ -43,4 +43,4 @@ function assistantsConfigSetup(config, prevConfig = {}) {
   };
 }
 
-module.exports = { assistantsAzureDefaults, assistantsConfigSetup };
+module.exports = { azureAssistantsDefaults, assistantsConfigSetup };

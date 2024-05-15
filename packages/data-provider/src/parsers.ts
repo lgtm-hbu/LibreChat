@@ -38,7 +38,7 @@ const endpointSchemas: Record<EModelEndpoint, EndpointSchema> = {
   [EModelEndpoint.chatGPTBrowser]: chatGPTBrowserSchema,
   [EModelEndpoint.gptPlugins]: gptPluginsSchema,
   [EModelEndpoint.assistants]: assistantSchema,
-  [EModelEndpoint.assistantsAzure]: assistantSchema,
+  [EModelEndpoint.azureAssistants]: assistantSchema,
 };
 
 // const schemaCreators: Record<EModelEndpoint, (customSchema: DefaultSchemaValues) => EndpointSchema> = {
@@ -50,7 +50,7 @@ export function getEnabledEndpoints() {
   const defaultEndpoints: string[] = [
     EModelEndpoint.openAI,
     EModelEndpoint.assistants,
-    EModelEndpoint.assistantsAzure,
+    EModelEndpoint.azureAssistants,
     EModelEndpoint.azureOpenAI,
     EModelEndpoint.google,
     EModelEndpoint.bingAI,
@@ -275,7 +275,7 @@ const compactEndpointSchemas: Record<string, CompactEndpointSchema> = {
   [EModelEndpoint.azureOpenAI]: compactOpenAISchema,
   [EModelEndpoint.custom]: compactOpenAISchema,
   [EModelEndpoint.assistants]: compactAssistantSchema,
-  [EModelEndpoint.assistantsAzure]: compactAssistantSchema,
+  [EModelEndpoint.azureAssistants]: compactAssistantSchema,
   [EModelEndpoint.google]: compactGoogleSchema,
   /* BingAI needs all fields */
   [EModelEndpoint.bingAI]: bingAISchema,

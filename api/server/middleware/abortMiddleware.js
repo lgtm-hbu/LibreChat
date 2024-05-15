@@ -15,7 +15,7 @@ async function abortMessage(req, res) {
     abortKey = conversationId;
   }
 
-  if (endpoint.includes(EModelEndpoint.assistants)) {
+  if (endpoint.toLowerCase().endsWith(EModelEndpoint.assistants)) {
     return await abortRun(req, res);
   }
 
