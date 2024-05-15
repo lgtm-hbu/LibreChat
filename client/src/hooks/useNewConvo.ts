@@ -98,7 +98,7 @@ const useNewConvo = (index = 0) => {
 
           if (
             conversation.assistant_id &&
-            !assistantsListMap[defaultEndpoint][conversation.assistant_id]
+            !assistantsListMap[defaultEndpoint]?.[conversation.assistant_id]
           ) {
             conversation.assistant_id = undefined;
           }
