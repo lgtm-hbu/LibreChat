@@ -138,39 +138,94 @@ export const getEndpointsConfigOverride = (): Promise<unknown | boolean> => {
 
 /* Assistants */
 
-export const createAssistant = (data: a.AssistantCreateParams): Promise<a.Assistant> => {
-  return request.post(endpoints.assistants(), data);
+export const createAssistant = ({
+  version,
+  ...data
+}: a.AssistantCreateParams): Promise<a.Assistant> => {
+  return request.post(endpoints.assistants({ version }), data);
 };
 
-export const getAssistantById = (assistant_id: string): Promise<a.Assistant> => {
-  return request.get(endpoints.assistants(assistant_id));
+export const getAssistantById = ({
+  assistant_id,
+  version,
+}: {
+  assistant_id: string;
+  version: string;
+}): Promise<a.Assistant> => {
+  return request.get(
+    endpoints.assistants({
+      path: assistant_id,
+      version,
+    }),
+  );
 };
 
-export const updateAssistant = (
-  assistant_id: string,
-  data: a.AssistantUpdateParams,
-): Promise<a.Assistant> => {
-  return request.patch(endpoints.assistants(assistant_id), data);
+export const updateAssistant = ({
+  assistant_id,
+  data,
+  version,
+}: {
+  assistant_id: string;
+  data: a.AssistantUpdateParams;
+  version: string;
+}): Promise<a.Assistant> => {
+  return request.patch(
+    endpoints.assistants({
+      path: assistant_id,
+      version,
+    }),
+    data,
+  );
 };
 
-export const deleteAssistant = (assistant_id: string, model: string): Promise<void> => {
-  return request.delete(endpoints.assistants(assistant_id, { model }));
+export const deleteAssistant = ({
+  assistant_id,
+  model,
+  version,
+}: {
+  assistant_id: string;
+  model: string;
+  version: string;
+}): Promise<void> => {
+  return request.delete(
+    endpoints.assistants({
+      path: assistant_id,
+      options: { model },
+      version,
+    }),
+  );
 };
 
 export const listAssistants = (
-  params?: a.AssistantListParams,
+  params: a.AssistantListParams,
+  version: string,
 ): Promise<a.AssistantListResponse> => {
-  return request.get(endpoints.assistants(), { params });
+  return request.get(
+    endpoints.assistants({
+      version,
+      options: { params },
+    }),
+  );
 };
 
-export function getAssistantDocs(): Promise<a.AssistantDocument[]> {
-  return request.get(endpoints.assistants('documents'));
+export function getAssistantDocs(version: string): Promise<a.AssistantDocument[]> {
+  return request.get(
+    endpoints.assistants({
+      path: 'documents',
+      version,
+    }),
+  );
 }
 
 /* Tools */
 
-export const getAvailableTools = (): Promise<s.TPlugin[]> => {
-  return request.get(`${endpoints.assistants()}/tools`);
+export const getAvailableTools = (version: string): Promise<s.TPlugin[]> => {
+  return request.get(
+    endpoints.assistants({
+      path: 'tools',
+      version,
+    }),
+  );
 };
 
 /* Files */
@@ -219,7 +274,11 @@ export const uploadAvatar = (data: FormData): Promise<f.AvatarUploadResponse> =>
 
 export const uploadAssistantAvatar = (data: m.AssistantAvatarVariables): Promise<a.Assistant> => {
   return request.postMultiPart(
-    endpoints.assistants(`avatar/${data.assistant_id}`, { model: data.model }),
+    endpoints.assistants({
+      path: `avatar/${data.assistant_id}`,
+      options: { model: data.model },
+      version: data.version,
+    }),
     data.formData,
   );
 };
@@ -244,20 +303,42 @@ export const deleteFiles = async (
 /* actions */
 
 export const updateAction = (data: m.UpdateActionVariables): Promise<m.UpdateActionResponse> => {
-  const { assistant_id, ...body } = data;
-  return request.post(endpoints.assistants(`actions/${assistant_id}`), body);
+  const { assistant_id, version, ...body } = data;
+  return request.post(
+    endpoints.assistants({
+      path: `actions/${assistant_id}`,
+      version,
+    }),
+    body,
+  );
 };
 
-export function getActions(): Promise<a.Action[]> {
-  return request.get(endpoints.assistants('actions'));
+export function getActions(version: string): Promise<a.Action[]> {
+  return request.get(
+    endpoints.assistants({
+      path: 'actions',
+      version,
+    }),
+  );
 }
 
-export const deleteAction = async (
-  assistant_id: string,
-  action_id: string,
-  model: string,
-): Promise<void> =>
-  request.delete(endpoints.assistants(`actions/${assistant_id}/${action_id}/${model}`));
+export const deleteAction = async ({
+  assistant_id,
+  action_id,
+  model,
+  version,
+}: {
+  assistant_id: string;
+  action_id: string;
+  model: string;
+  version: string;
+}): Promise<void> =>
+  request.delete(
+    endpoints.assistants({
+      path: `actions/${assistant_id}/${action_id}/${model}`,
+      version,
+    }),
+  );
 
 /* conversations */
 

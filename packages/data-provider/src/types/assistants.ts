@@ -1,4 +1,5 @@
 import type { OpenAPIV3 } from 'openapi-types';
+import { EModelEndpoint } from 'src/schemas';
 import type { TFile } from './files';
 
 export type Schema = OpenAPIV3.SchemaObject & { description?: string };
@@ -48,6 +49,7 @@ export type AssistantCreateParams = {
   metadata?: Metadata | null;
   name?: string | null;
   tools?: Array<FunctionTool | string>;
+  version: string;
 };
 
 export type AssistantUpdateParams = {
@@ -65,6 +67,7 @@ export type AssistantListParams = {
   before?: string | null;
   after?: string | null;
   order?: 'asc' | 'desc';
+  endpoint: EModelEndpoint.assistants | EModelEndpoint.assistantsAzure;
 };
 
 export type AssistantListResponse = {
@@ -315,6 +318,7 @@ export type Action = {
   type?: string;
   settings?: Record<string, unknown>;
   metadata: ActionMetadata;
+  version: string;
 };
 
 export type AssistantAvatar = {

@@ -149,7 +149,7 @@ router.delete('/:id', async (req, res) => {
  */
 router.get('/', async (req, res) => {
   try {
-    const { limit = 100, order = 'desc', after, before } = req.query;
+    const { limit = 100, order = 'desc', after, before, endpoint } = req.query;
     const query = { limit, order, after, before };
 
     const azureConfig = req.app.locals[EModelEndpoint.azureOpenAI];
@@ -162,9 +162,9 @@ router.get('/', async (req, res) => {
       ({ body } = await listAssistants({ req, res, query }));
     }
 
-    if (req.app.locals?.[EModelEndpoint.assistants]) {
+    if (req.app.locals?.[endpoint]) {
       /** @type {Partial<TAssistantEndpoint>} */
-      const assistantsConfig = req.app.locals[EModelEndpoint.assistants];
+      const assistantsConfig = req.app.locals[endpoint];
       const { supportedIds, excludedIds } = assistantsConfig;
       if (supportedIds?.length) {
         body.data = body.data.filter((assistant) => supportedIds.includes(assistant.id));

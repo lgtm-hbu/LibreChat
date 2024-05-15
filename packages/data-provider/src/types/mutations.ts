@@ -45,6 +45,7 @@ export type AssistantAvatarVariables = {
   model: string;
   formData: FormData;
   postCreation?: boolean;
+  version: string;
 };
 
 export type UpdateActionVariables = {
@@ -53,6 +54,7 @@ export type UpdateActionVariables = {
   metadata: ActionMetadata;
   action_id?: string;
   model: string;
+  version: string;
 };
 
 export type UploadAssistantAvatarOptions = MutationOptions<Assistant, AssistantAvatarVariables>;
