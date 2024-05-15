@@ -203,7 +203,7 @@ export const listAssistants = (
   return request.get(
     endpoints.assistants({
       version,
-      options: { params },
+      options: params,
     }),
   );
 };
