@@ -28,7 +28,7 @@ export enum EModelEndpoint {
 
 export type AssistantsEndpoint = EModelEndpoint.assistants | EModelEndpoint.azureAssistants;
 
-export const isAssistantsEndpoint = (endpoint?: AssistantsEndpoint | string): boolean => {
+export const isAssistantsEndpoint = (endpoint?: AssistantsEndpoint | null | string): boolean => {
   if (!endpoint) {
     return false;
   }

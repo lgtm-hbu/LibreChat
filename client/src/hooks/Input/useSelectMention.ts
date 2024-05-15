@@ -2,11 +2,11 @@ import { useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
 import { EModelEndpoint } from 'librechat-data-provider';
 import type {
+  TPreset,
   TModelSpec,
   TConversation,
+  TAssistantsMap,
   TEndpointsConfig,
-  TPreset,
-  Assistant,
 } from 'librechat-data-provider';
 import type { MentionOption } from '~/common';
 import { getConvoSwitchLogic, getModelSpecIconURL, removeUnavailableTools } from '~/utils';
@@ -23,7 +23,7 @@ export default function useSelectMention({
   presets?: TPreset[];
   modelSpecs: TModelSpec[];
   endpointsConfig: TEndpointsConfig;
-  assistantMap: Record<string, Assistant>;
+  assistantMap: TAssistantsMap;
 }) {
   const { conversation } = useChatContext();
   const { newConversation } = useNewConvo();
@@ -197,7 +197,12 @@ export default function useSelectMention({
       } else if (option.type === 'assistant') {
         onSelectEndpoint(EModelEndpoint.assistants, {
           assistant_id: key,
-          model: assistantMap?.[key]?.model ?? '',
+          model: assistantMap?.[EModelEndpoint.assistants]?.[key]?.model ?? '',
+        });
+      } else if (option.type === 'azureAssistant') {
+        onSelectEndpoint(EModelEndpoint.azureAssistants, {
+          assistant_id: key,
+          model: assistantMap?.[EModelEndpoint.azureAssistants]?.[key]?.model ?? '',
         });
       }
     },

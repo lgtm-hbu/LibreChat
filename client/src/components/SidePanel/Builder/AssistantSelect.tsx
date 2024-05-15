@@ -2,20 +2,18 @@ import { Plus } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
 import {
   defaultAssistantFormValues,
-  defaultOrderQuery,
   isImageVisionTool,
-  EModelEndpoint,
   Capabilities,
   FileSources,
 } from 'librechat-data-provider';
 import type { UseFormReset } from 'react-hook-form';
 import type { UseMutationResult } from '@tanstack/react-query';
-import type { Assistant, AssistantCreateParams } from 'librechat-data-provider';
+import type { Assistant, AssistantCreateParams, AssistantsEndpoint } from 'librechat-data-provider';
 import type {
-  AssistantForm,
   Actions,
-  TAssistantOption,
   ExtendedFile,
+  AssistantForm,
+  TAssistantOption,
   LastSelectedModels,
 } from '~/common';
 import SelectDropDown from '~/components/ui/SelectDropDown';
@@ -29,12 +27,14 @@ const keys = new Set(['name', 'id', 'description', 'instructions', 'model']);
 export default function AssistantSelect({
   reset,
   value,
+  endpoint,
   selectedAssistant,
   setCurrentAssistantId,
   createMutation,
 }: {
   reset: UseFormReset<AssistantForm>;
   value: TAssistantOption;
+  endpoint: AssistantsEndpoint;
   selectedAssistant: string | null;
   setCurrentAssistantId: React.Dispatch<React.SetStateAction<string | undefined>>;
   createMutation: UseMutationResult<Assistant, Error, AssistantCreateParams>;
@@ -47,7 +47,7 @@ export default function AssistantSelect({
     {} as LastSelectedModels,
   );
 
-  const assistants = useListAssistantsQuery(defaultOrderQuery, {
+  const assistants = useListAssistantsQuery(endpoint, undefined, {
     select: (res) =>
       res.data.map((_assistant) => {
         const assistant = {
@@ -92,7 +92,7 @@ export default function AssistantSelect({
         setCurrentAssistantId(undefined);
         return reset({
           ...defaultAssistantFormValues,
-          model: lastSelectedModels?.[EModelEndpoint.assistants] ?? '',
+          model: lastSelectedModels?.[endpoint] ?? '',
         });
       }
 
@@ -141,7 +141,7 @@ export default function AssistantSelect({
       reset(formValues);
       setCurrentAssistantId(assistant?.id);
     },
-    [assistants.data, reset, setCurrentAssistantId, createMutation, lastSelectedModels],
+    [assistants.data, reset, setCurrentAssistantId, createMutation, endpoint, lastSelectedModels],
   );
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import * as Popover from '@radix-ui/react-popover';
-import type { Assistant, AssistantCreateParams } from 'librechat-data-provider';
+import type { Assistant, AssistantCreateParams, AssistantsEndpoint } from 'librechat-data-provider';
 import type { UseMutationResult } from '@tanstack/react-query';
 import { Dialog, DialogTrigger, Label } from '~/components/ui';
 import DialogTemplate from '~/components/ui/DialogTemplate';
@@ -14,11 +14,13 @@ export default function ContextButton({
   assistant_id,
   setCurrentAssistantId,
   createMutation,
+  endpoint,
 }: {
   activeModel: string;
   assistant_id: string;
   setCurrentAssistantId: React.Dispatch<React.SetStateAction<string | undefined>>;
   createMutation: UseMutationResult<Assistant, Error, AssistantCreateParams>;
+  endpoint: AssistantsEndpoint;
 }) {
   const localize = useLocalize();
   const { conversation } = useChatContext();
@@ -138,7 +140,8 @@ export default function ContextButton({
             </>
           }
           selection={{
-            selectHandler: () => deleteAssistant.mutate({ assistant_id, model: activeModel }),
+            selectHandler: () =>
+              deleteAssistant.mutate({ assistant_id, model: activeModel, endpoint }),
             selectClasses: 'bg-red-600 hover:bg-red-700 dark:hover:bg-red-800 text-white',
             selectText: localize('com_ui_delete'),
           }}

@@ -41,6 +41,8 @@ export type Assistant = {
   tools: FunctionTool[];
 };
 
+export type TAssistantsMap = Record<AssistantsEndpoint, Record<string, Assistant>>;
+
 export type AssistantCreateParams = {
   model: string;
   description?: string | null;

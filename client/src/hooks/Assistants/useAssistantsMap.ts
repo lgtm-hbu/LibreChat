@@ -1,8 +1,13 @@
 import { EModelEndpoint } from 'librechat-data-provider';
+import type { TAssistantsMap } from 'librechat-data-provider';
 import { useListAssistantsQuery } from '~/data-provider';
 import { mapAssistants } from '~/utils';
 
-export default function useAssistantsMap({ isAuthenticated }: { isAuthenticated: boolean }) {
+export default function useAssistantsMap({
+  isAuthenticated,
+}: {
+  isAuthenticated: boolean;
+}): TAssistantsMap {
   const { data: assistants = {} } = useListAssistantsQuery(EModelEndpoint.assistants, undefined, {
     select: (res) => mapAssistants(res.data),
     enabled: isAuthenticated,

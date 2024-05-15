@@ -1,6 +1,6 @@
 import debounce from 'lodash/debounce';
 import { useEffect, useRef, useCallback } from 'react';
-import { EModelEndpoint } from 'librechat-data-provider';
+import { isAssistantsEndpoint } from 'librechat-data-provider';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import type { TEndpointOption } from 'librechat-data-provider';
 import type { KeyboardEvent } from 'react';
@@ -45,10 +45,11 @@ export default function useTextarea({
   const { conversationId, jailbreak, endpoint = '', assistant_id } = conversation || {};
   const isNotAppendable =
     ((latestMessage?.unfinished && !isSubmitting) || latestMessage?.error) &&
-    endpoint !== EModelEndpoint.assistants;
+    !isAssistantsEndpoint(endpoint);
   // && (conversationId?.length ?? 0) > 6; // also ensures that we don't show the wrong placeholder
 
-  const assistant = endpoint === EModelEndpoint.assistants && assistantMap?.[assistant_id ?? ''];
+  const assistant =
+    isAssistantsEndpoint(endpoint) && assistantMap?.[endpoint ?? '']?.[assistant_id ?? ''];
   const assistantName = (assistant && assistant?.name) || '';
 
   // auto focus to input, when enter a conversation.
@@ -87,7 +88,7 @@ export default function useTextarea({
         return localize('com_endpoint_config_placeholder');
       }
       if (
-        conversation?.endpoint === EModelEndpoint.assistants &&
+        isAssistantsEndpoint(conversation?.endpoint) &&
         (!conversation?.assistant_id || !assistantMap?.[conversation?.assistant_id ?? ''])
       ) {
         return localize('com_endpoint_assistant_placeholder');
@@ -97,10 +98,9 @@ export default function useTextarea({
         return localize('com_endpoint_message_not_appendable');
       }
 
-      const sender =
-        conversation?.endpoint === EModelEndpoint.assistants
-          ? getAssistantName({ name: assistantName, localize })
-          : getSender(conversation as TEndpointOption);
+      const sender = isAssistantsEndpoint(conversation?.endpoint)
+        ? getAssistantName({ name: assistantName, localize })
+        : getSender(conversation as TEndpointOption);
 
       return `${localize('com_endpoint_message')} ${sender ? sender : 'ChatGPT'}…`;
     };
