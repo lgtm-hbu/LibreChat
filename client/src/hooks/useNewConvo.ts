@@ -96,10 +96,18 @@ const useNewConvo = (index = 0) => {
           const isAssistantEndpoint = isAssistantsEndpoint(defaultEndpoint);
           const assistants: AssistantListItem[] = assistantsListMap[defaultEndpoint] ?? [];
 
+          if (
+            conversation.assistant_id &&
+            !assistantsListMap[defaultEndpoint][conversation.assistant_id]
+          ) {
+            conversation.assistant_id = undefined;
+          }
+
           if (!conversation.assistant_id && isAssistantEndpoint) {
             conversation.assistant_id =
-              localStorage.getItem(`${LocalStorageKeys.ASST_ID_PREFIX}${index}`) ??
-              assistants[0]?.id;
+              localStorage.getItem(
+                `${LocalStorageKeys.ASST_ID_PREFIX}${index}${defaultEndpoint}`,
+              ) ?? assistants[0]?.id;
           }
 
           if (
