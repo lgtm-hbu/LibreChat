@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
-import { EModelEndpoint } from 'librechat-data-provider';
+import { EModelEndpoint, isAssistantsEndpoint } from 'librechat-data-provider';
 import type {
   TPreset,
   TModelSpec,
@@ -194,15 +194,10 @@ export default function useSelectMention({
         onSelectEndpoint(key, { model: option.label });
       } else if (option.type === 'endpoint') {
         onSelectEndpoint(key);
-      } else if (option.type === 'assistant') {
-        onSelectEndpoint(EModelEndpoint.assistants, {
+      } else if (isAssistantsEndpoint(option.type)) {
+        onSelectEndpoint(option.type, {
           assistant_id: key,
-          model: assistantMap?.[EModelEndpoint.assistants]?.[key]?.model ?? '',
-        });
-      } else if (option.type === 'azureAssistant') {
-        onSelectEndpoint(EModelEndpoint.azureAssistants, {
-          assistant_id: key,
-          model: assistantMap?.[EModelEndpoint.azureAssistants]?.[key]?.model ?? '',
+          model: assistantMap?.[option.type]?.[key]?.model ?? '',
         });
       }
     },
