@@ -70,6 +70,7 @@ function Avatar({
 
       const res = queryClient.getQueryData<AssistantListResponse>([
         QueryKeys.assistants,
+        endpoint,
         defaultOrderQuery,
       ]);
 
@@ -88,10 +89,13 @@ function Avatar({
           return assistant;
         }) ?? [];
 
-      queryClient.setQueryData<AssistantListResponse>([QueryKeys.assistants, defaultOrderQuery], {
-        ...res,
-        data: assistants,
-      });
+      queryClient.setQueryData<AssistantListResponse>(
+        [QueryKeys.assistants, endpoint, defaultOrderQuery],
+        {
+          ...res,
+          data: assistants,
+        },
+      );
 
       setProgress(1);
     },
