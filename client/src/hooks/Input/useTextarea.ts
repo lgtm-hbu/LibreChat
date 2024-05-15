@@ -87,9 +87,11 @@ export default function useTextarea({
       if (disabled) {
         return localize('com_endpoint_config_placeholder');
       }
+      const currentEndpoint = conversation?.endpoint ?? '';
+      const currentAssistantId = conversation?.assistant_id ?? '';
       if (
-        isAssistantsEndpoint(conversation?.endpoint) &&
-        (!conversation?.assistant_id || !assistantMap?.[conversation?.assistant_id ?? ''])
+        isAssistantsEndpoint(currentEndpoint) &&
+        (!currentAssistantId || !assistantMap?.[currentEndpoint]?.[currentAssistantId ?? ''])
       ) {
         return localize('com_endpoint_assistant_placeholder');
       }
@@ -98,7 +100,7 @@ export default function useTextarea({
         return localize('com_endpoint_message_not_appendable');
       }
 
-      const sender = isAssistantsEndpoint(conversation?.endpoint)
+      const sender = isAssistantsEndpoint(currentEndpoint)
         ? getAssistantName({ name: assistantName, localize })
         : getSender(conversation as TEndpointOption);
 
