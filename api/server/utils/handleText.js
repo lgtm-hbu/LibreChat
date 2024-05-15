@@ -1,7 +1,8 @@
 const {
   Capabilities,
-  defaultRetrievalModels,
   EModelEndpoint,
+  isAssistantsEndpoint,
+  defaultRetrievalModels,
   defaultAssistantsVersion,
 } = require('librechat-data-provider');
 const { getCitations, citeText } = require('./citations');
@@ -174,7 +175,7 @@ function generateConfig(key, baseURL, endpoint) {
     config.userProvideURL = isUserProvided(baseURL);
   }
 
-  const assistants = endpoint && endpoint.toLowerCase().endsWith(EModelEndpoint.assistants);
+  const assistants = isAssistantsEndpoint(endpoint);
 
   if (assistants) {
     config.retrievalModels = defaultRetrievalModels;

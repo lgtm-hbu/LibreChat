@@ -11,6 +11,7 @@ const {
   mergeFileConfig,
   hostImageIdSuffix,
   hostImageNamePrefix,
+  isAssistantsEndpoint,
 } = require('librechat-data-provider');
 const { convertImage, resizeAndConvert } = require('~/server/services/Files/images');
 const { initializeClient } = require('~/server/services/Endpoints/assistants');
@@ -274,7 +275,7 @@ const uploadImageBuffer = async ({ req, context, metadata = {}, resize = true })
  * @returns {Promise<void>}
  */
 const processFileUpload = async ({ req, res, file, metadata }) => {
-  const isAssistantUpload = metadata.endpoint.toLowerCase().endsWith(EModelEndpoint.assistants);
+  const isAssistantUpload = isAssistantsEndpoint(metadata.endpoint);
   const assistantSource =
     metadata.endpoint === EModelEndpoint.azureAssistants ? FileSources.azure : FileSources.openai;
   const source = isAssistantUpload ? assistantSource : FileSources.vectordb;

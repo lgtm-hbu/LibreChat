@@ -6,6 +6,7 @@ import {
   EModelEndpoint,
   codeTypeMapping,
   mergeFileConfig,
+  isAssistantsEndpoint,
   fileConfig as defaultFileConfig,
 } from 'librechat-data-provider';
 import type { ExtendedFile, FileSetter } from '~/common';
@@ -146,7 +147,7 @@ const useFileHandling = (params?: UseFileHandling) => {
     }
 
     if (
-      endpoint.toLowerCase().endsWith(EModelEndpoint.assistants) &&
+      isAssistantsEndpoint(endpoint) &&
       !formData.get('assistant_id') &&
       conversation?.assistant_id
     ) {

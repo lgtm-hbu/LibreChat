@@ -28,6 +28,13 @@ export enum EModelEndpoint {
 
 export type AssistantsEndpoint = EModelEndpoint.assistants | EModelEndpoint.azureAssistants;
 
+export const isAssistantsEndpoint = (endpoint?: AssistantsEndpoint | string): boolean => {
+  if (!endpoint) {
+    return false;
+  }
+  return endpoint.toLowerCase().endsWith(EModelEndpoint.assistants);
+};
+
 export enum ImageDetail {
   low = 'low',
   auto = 'auto',
