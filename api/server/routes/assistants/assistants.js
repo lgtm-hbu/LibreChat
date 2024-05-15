@@ -1,16 +1,11 @@
 const multer = require('multer');
 const express = require('express');
-const { FileContext, EModelEndpoint } = require('librechat-data-provider');
-const { listAssistants, initializeClient } = require('~/server/services/Endpoints/assistants');
-const {
-  listAssistantsForAzure,
-  // initializeClient: initializeAzureClient,
-} = require('~/server/services/Endpoints/azureAssistants');
+const { FileContext } = require('librechat-data-provider');
 const { getStrategyFunctions } = require('~/server/services/Files/strategies');
 const { uploadImageBuffer } = require('~/server/services/Files/process');
 const { updateAssistant, getAssistants } = require('~/models/Assistant');
 const { deleteFileByFilter } = require('~/models/File');
-const { getCurrentVersion } = require('./helpers');
+const { getOpenAIClient, fetchAssistants } = require('./helpers');
 const { logger } = require('~/config');
 const actions = require('./actions');
 const tools = require('./tools');
@@ -39,8 +34,7 @@ router.use('/tools', tools);
  */
 router.post('/', async (req, res) => {
   try {
-    /** @type {{ openai: OpenAI }} */
-    const { openai } = await initializeClient({ req, res });
+    const openai = await getOpenAIClient({ req, res });
 
     const { tools = [], ...assistantData } = req.body;
     assistantData.tools = tools
@@ -74,8 +68,7 @@ router.post('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    /** @type {{ openai: OpenAI }} */
-    const { openai } = await initializeClient({ req, res });
+    const openai = await getOpenAIClient({ req, res });
 
     const assistant_id = req.params.id;
     const assistant = await openai.beta.assistants.retrieve(assistant_id);
@@ -95,8 +88,7 @@ router.get('/:id', async (req, res) => {
  */
 router.patch('/:id', async (req, res) => {
   try {
-    /** @type {{ openai: OpenAI }} */
-    const { openai } = await initializeClient({ req, res });
+    const openai = await getOpenAIClient({ req, res });
 
     const assistant_id = req.params.id;
     const updateData = req.body;
@@ -130,8 +122,7 @@ router.patch('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
   try {
-    /** @type {{ openai: OpenAI }} */
-    const { openai } = await initializeClient({ req, res });
+    const openai = await getOpenAIClient({ req, res });
 
     const assistant_id = req.params.id;
     const deletionStatus = await openai.beta.assistants.del(assistant_id);
@@ -150,23 +141,11 @@ router.delete('/:id', async (req, res) => {
  */
 router.get('/', async (req, res) => {
   try {
-    const version = getCurrentVersion(req);
-    const { limit = 100, order = 'desc', after, before, endpoint } = req.query;
-    const query = { limit, order, after, before };
+    const body = await fetchAssistants(req, res);
 
-    const azureConfig = req.app.locals[EModelEndpoint.azureOpenAI];
-    /** @type {AssistantListResponse} */
-    let body;
-
-    if (endpoint === EModelEndpoint.azureAssistants && azureConfig?.assistants) {
-      body = await listAssistantsForAzure({ req, res, version, azureConfig, query });
-    } else {
-      ({ body } = await listAssistants({ req, res, version, query }));
-    }
-
-    if (req.app.locals?.[endpoint]) {
+    if (req.app.locals?.[req.query.endpoint]) {
       /** @type {Partial<TAssistantEndpoint>} */
-      const assistantsConfig = req.app.locals[endpoint];
+      const assistantsConfig = req.app.locals[req.query.endpoint];
       const { supportedIds, excludedIds } = assistantsConfig;
       if (supportedIds?.length) {
         body.data = body.data.filter((assistant) => supportedIds.includes(assistant.id));
@@ -212,8 +191,7 @@ router.post('/avatar/:assistant_id', upload.single('file'), async (req, res) => 
     }
 
     let { metadata: _metadata = '{}' } = req.body;
-    /** @type {{ openai: OpenAI }} */
-    const { openai } = await initializeClient({ req, res });
+    const openai = await getOpenAIClient({ req, res });
 
     const image = await uploadImageBuffer({
       req,
