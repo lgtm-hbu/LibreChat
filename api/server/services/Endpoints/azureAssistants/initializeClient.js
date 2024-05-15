@@ -15,7 +15,7 @@ const OpenAIClient = require('~/app/clients/OpenAIClient');
 const { isUserProvided } = require('~/server/utils');
 const { constructAzureURL } = require('~/utils');
 
-const initializeClient = async ({ req, res, endpointOption, initAppClient = false }) => {
+const initializeClient = async ({ req, res, version, endpointOption, initAppClient = false }) => {
   const { PROXY, OPENAI_ORGANIZATION, AZURE_ASSISTANTS_API_KEY, AZURE_ASSISTANTS_BASE_URL } =
     process.env;
 
@@ -77,7 +77,11 @@ const initializeClient = async ({ req, res, endpointOption, initAppClient = fals
 
     apiKey = azureOptions.azureOpenAIApiKey;
     opts.defaultQuery = { 'api-version': azureOptions.azureOpenAIApiVersion };
-    opts.defaultHeaders = resolveHeaders({ ...headers, 'api-key': apiKey });
+    opts.defaultHeaders = resolveHeaders({
+      ...headers,
+      'api-key': apiKey,
+      'OpenAI-Beta': `assistants=${version}`,
+    });
     opts.model = azureOptions.azureOpenAIApiDeploymentName;
 
     if (initAppClient) {

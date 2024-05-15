@@ -1,15 +1,16 @@
 const multer = require('multer');
 const express = require('express');
 const { FileContext, EModelEndpoint } = require('librechat-data-provider');
+const { listAssistants, initializeClient } = require('~/server/services/Endpoints/assistants');
 const {
-  initializeClient,
   listAssistantsForAzure,
-  listAssistants,
-} = require('~/server/services/Endpoints/assistants');
+  // initializeClient: initializeAzureClient,
+} = require('~/server/services/Endpoints/azureAssistants');
 const { getStrategyFunctions } = require('~/server/services/Files/strategies');
 const { uploadImageBuffer } = require('~/server/services/Files/process');
 const { updateAssistant, getAssistants } = require('~/models/Assistant');
 const { deleteFileByFilter } = require('~/models/File');
+const { getCurrentVersion } = require('./helpers');
 const { logger } = require('~/config');
 const actions = require('./actions');
 const tools = require('./tools');
@@ -149,6 +150,7 @@ router.delete('/:id', async (req, res) => {
  */
 router.get('/', async (req, res) => {
   try {
+    const version = getCurrentVersion(req);
     const { limit = 100, order = 'desc', after, before, endpoint } = req.query;
     const query = { limit, order, after, before };
 
@@ -156,10 +158,10 @@ router.get('/', async (req, res) => {
     /** @type {AssistantListResponse} */
     let body;
 
-    if (azureConfig?.assistants) {
-      body = await listAssistantsForAzure({ req, res, azureConfig, query });
+    if (endpoint === EModelEndpoint.azureAssistants && azureConfig?.assistants) {
+      body = await listAssistantsForAzure({ req, res, version, azureConfig, query });
     } else {
-      ({ body } = await listAssistants({ req, res, query }));
+      ({ body } = await listAssistants({ req, res, version, query }));
     }
 
     if (req.app.locals?.[endpoint]) {

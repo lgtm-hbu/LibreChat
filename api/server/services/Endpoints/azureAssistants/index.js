@@ -12,11 +12,12 @@ const initializeClient = require('./initializeClient');
  * @param {object} params - The parameters object.
  * @param {object} params.req - The request object, used for initializing the client.
  * @param {object} params.res - The response object, used for initializing the client.
+ * @param {string} params.version - The API version to use.
  * @param {object} params.query - The query parameters to list assistants (e.g., limit, order).
  * @returns {Promise<object>} A promise that resolves to the response from the `openai.beta.assistants.list` method call.
  */
-const listAssistants = async ({ req, res, query }) => {
-  const { openai } = await initializeClient({ req, res });
+const listAssistants = async ({ req, res, version, query }) => {
+  const { openai } = await initializeClient({ req, res, version });
   return openai.beta.assistants.list(query);
 };
 
@@ -30,11 +31,12 @@ const listAssistants = async ({ req, res, query }) => {
  * @param {object} params - The parameters object.
  * @param {object} params.req - The request object, used for initializing the client and manipulating the request body.
  * @param {object} params.res - The response object, used for initializing the client.
+ * @param {string} params.version - The API version to use.
  * @param {TAzureConfig} params.azureConfig - The Azure configuration object containing assistantGroups and groupMap.
  * @param {object} params.query - The query parameters to list assistants (e.g., limit, order).
  * @returns {Promise<AssistantListResponse>} A promise that resolves to an array of assistant data merged with their respective model information.
  */
-const listAssistantsForAzure = async ({ req, res, azureConfig = {}, query }) => {
+const listAssistantsForAzure = async ({ req, res, version, azureConfig = {}, query }) => {
   /** @type {Array<[string, TAzureModelConfig]>} */
   const groupModelTuples = [];
   const promises = [];
@@ -53,7 +55,7 @@ const listAssistantsForAzure = async ({ req, res, azureConfig = {}, query }) => 
     /* The specified model is only necessary to
     fetch assistants for the shared instance */
     req.body.model = currentModelTuples[0][0];
-    promises.push(listAssistants({ req, res, query }));
+    promises.push(listAssistants({ req, res, version, query }));
   }
 
   const resolvedQueries = await Promise.all(promises);
