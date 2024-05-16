@@ -503,32 +503,35 @@ const recordUsage = async ({
  * after verifying that the text within that range matches the given annotation text.
  * Proceeds with the replacement even if a mismatch is found, but logs a warning.
  *
- * @param {string} originalText The original text content.
- * @param {number} start_index The starting index where replacement should begin.
- * @param {number} end_index The ending index where replacement should end.
- * @param {string} expectedText The text expected to be found in the specified range.
- * @param {string} replacementText The text to insert in place of the existing content.
+ * @param {object} params The original text content.
+ * @param {string} params.originalText The original text content.
+ * @param {string} params.currentText The current text content, with/without replacements.
+ * @param {number} params.start_index The starting index where replacement should begin.
+ * @param {number} params.end_index The ending index where replacement should end.
+ * @param {string} params.expectedText The text expected to be found in the specified range.
+ * @param {string} params.replacementText The text to insert in place of the existing content.
  * @returns {string} The text with the replacement applied, regardless of text match.
  */
-function replaceAnnotation(originalText, start_index, end_index, expectedText, replacementText) {
+function replaceAnnotation({
+  originalText,
+  currentText,
+  start_index,
+  end_index,
+  expectedText,
+  replacementText,
+}) {
   if (start_index < 0 || end_index > originalText.length || start_index > end_index) {
     logger.warn(`Invalid range specified for annotation replacement.
     Attempting replacement with \`replace\` method instead...
     length: ${originalText.length}
     start_index: ${start_index}
     end_index: ${end_index}`);
-    return originalText.replace(originalText, replacementText);
+    return currentText.replace(expectedText, replacementText);
   }
 
-  const actualTextInRange = originalText.substring(start_index, end_index);
-
+  const actualTextInRange = currentText.substring(start_index, end_index);
   if (actualTextInRange !== expectedText) {
-    logger.warn(`The text within the specified range does not match the expected annotation text.
-    Attempting replacement with \`replace\` method instead...
-    Expected: ${expectedText}
-    Actual: ${actualTextInRange}`);
-
-    return originalText.replace(originalText, replacementText);
+    return currentText.replace(expectedText, replacementText);
   }
 
   const beforeText = originalText.substring(0, start_index);
@@ -582,6 +585,9 @@ async function processMessages({ openai, client, messages = [] }) {
         continue;
       }
 
+      const originalText = currentText;
+      text += originalText;
+
       logger.debug('[processMessages] Processing annotations:', annotations);
       for (const annotation of annotations) {
         let file;
@@ -590,14 +596,16 @@ async function processMessages({ openai, client, messages = [] }) {
         const file_id = annotationType?.file_id;
         const alreadyProcessed = client.processedFileIds.has(file_id);
 
-        const replaceCurrentAnnotation = (replacement = '') => {
-          currentText = replaceAnnotation(
+        const replaceCurrentAnnotation = (replacementText = '') => {
+          const { start_index, end_index, text: expectedText } = annotation;
+          currentText = replaceAnnotation({
+            originalText,
             currentText,
-            annotation.start_index,
-            annotation.end_index,
-            annotation.text,
-            replacement,
-          );
+            start_index,
+            end_index,
+            expectedText,
+            replacementText,
+          });
           edited = true;
         };
 
@@ -624,7 +632,7 @@ async function processMessages({ openai, client, messages = [] }) {
           replaceCurrentAnnotation(`^${sources.length}^`);
         }
 
-        text += currentText + ' ';
+        text = currentText;
 
         if (!file) {
           continue;
