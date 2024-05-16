@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
   try {
     const openai = await getOpenAIClient({ req, res });
 
-    const { tools = [], ...assistantData } = req.body;
+    const { tools = [], endpoint: _endpoint, ...assistantData } = req.body;
     assistantData.tools = tools
       .map((tool) => {
         if (typeof tool !== 'string') {
@@ -47,11 +47,16 @@ router.post('/', async (req, res) => {
       })
       .filter((tool) => tool);
 
+    let azureModelIdentifier = null;
     if (openai.locals?.azureOptions) {
+      azureModelIdentifier = assistantData.model;
       assistantData.model = openai.locals.azureOptions.azureOpenAIApiDeploymentName;
     }
 
     const assistant = await openai.beta.assistants.create(assistantData);
+    if (azureModelIdentifier) {
+      assistant.model = azureModelIdentifier;
+    }
     logger.debug('/assistants/', assistant);
     res.status(201).json(assistant);
   } catch (error) {
