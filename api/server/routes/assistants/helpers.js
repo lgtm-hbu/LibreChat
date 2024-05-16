@@ -15,7 +15,9 @@ const getCurrentVersion = (req) => {
   if (TESTING) {
     return TESTING;
   }
-  return req.baseUrl.slice(-2);
+
+  const index = req.baseUrl.lastIndexOf('/v');
+  return index !== -1 ? req.baseUrl.substring(index + 1, index + 3) : null;
 };
 
 const getOpenAIClient = async ({ req, res }) => {
