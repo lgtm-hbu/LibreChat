@@ -2,9 +2,9 @@ const { v4 } = require('uuid');
 const express = require('express');
 const { encryptMetadata, domainParser } = require('~/server/services/ActionService');
 const { actionDelimiter, EModelEndpoint } = require('librechat-data-provider');
+const { getOpenAIClient } = require('~/server/controllers/assistants/helpers');
 const { updateAction, getActions, deleteAction } = require('~/models/Action');
 const { updateAssistant, getAssistant } = require('~/models/Assistant');
-const { getOpenAIClient } = require('./helpers');
 const { logger } = require('~/config');
 
 const router = express.Router();

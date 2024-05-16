@@ -1,5 +1,4 @@
 const { v4 } = require('uuid');
-const express = require('express');
 const {
   Constants,
   RunStatus,
@@ -32,17 +31,7 @@ const { getModelMaxTokens } = require('~/utils');
 const { getOpenAIClient } = require('./helpers');
 const { logger } = require('~/config');
 
-const router = express.Router();
-const {
-  setHeaders,
-  handleAbort,
-  validateModel,
-  handleAbortError,
-  // validateEndpoint,
-  buildEndpointOption,
-} = require('~/server/middleware');
-
-router.post('/abort', handleAbort());
+const { handleAbortError } = require('~/server/middleware');
 
 const ten_minutes = 1000 * 60 * 10;
 
@@ -50,11 +39,11 @@ const ten_minutes = 1000 * 60 * 10;
  * @route POST /
  * @desc Chat with an assistant
  * @access Public
- * @param {express.Request} req - The request object, containing the request data.
- * @param {express.Response} res - The response object, used to send back a response.
+ * @param {Express.Request} req - The request object, containing the request data.
+ * @param {Express.Response} res - The response object, used to send back a response.
  * @returns {void}
  */
-router.post('/', validateModel, buildEndpointOption, setHeaders, async (req, res) => {
+const chatV2 = async (req, res) => {
   logger.debug('[/assistants/chat/] req.body', req.body);
 
   const {
@@ -658,6 +647,6 @@ router.post('/', validateModel, buildEndpointOption, setHeaders, async (req, res
   } catch (error) {
     await handleError(error);
   }
-});
+};
 
-module.exports = router;
+module.exports = chatV2;

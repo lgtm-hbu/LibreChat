@@ -1,5 +1,3 @@
-const multer = require('multer');
-const express = require('express');
 const { FileContext } = require('librechat-data-provider');
 const { getStrategyFunctions } = require('~/server/services/Files/strategies');
 const { uploadImageBuffer } = require('~/server/services/Files/process');
@@ -7,24 +5,6 @@ const { updateAssistant, getAssistants } = require('~/models/Assistant');
 const { getOpenAIClient, fetchAssistants } = require('./helpers');
 const { deleteFileByFilter } = require('~/models/File');
 const { logger } = require('~/config');
-const actions = require('./actions');
-const tools = require('./tools');
-
-const upload = multer();
-const router = express.Router();
-
-/**
- * Assistant actions route.
- * @route GET|POST /assistants/actions
- */
-router.use('/actions', actions);
-
-/**
- * Create an assistant.
- * @route GET /assistants/tools
- * @returns {TPlugin[]} 200 - application/json
- */
-router.use('/tools', tools);
 
 /**
  * Create an assistant.
@@ -32,7 +12,7 @@ router.use('/tools', tools);
  * @param {AssistantCreateParams} req.body - The assistant creation parameters.
  * @returns {Assistant} 201 - success response - application/json
  */
-router.post('/', async (req, res) => {
+const createAssistant = async (req, res) => {
   try {
     const { openai } = await getOpenAIClient({ req, res });
 
@@ -63,7 +43,7 @@ router.post('/', async (req, res) => {
     logger.error('[/assistants] Error creating assistant', error);
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 /**
  * Retrieves an assistant.
@@ -71,7 +51,7 @@ router.post('/', async (req, res) => {
  * @param {string} req.params.id - Assistant identifier.
  * @returns {Assistant} 200 - success response - application/json
  */
-router.get('/:id', async (req, res) => {
+const retrieveAssistant = async (req, res) => {
   try {
     /* NOTE: not actually being used right now */
     const { openai } = await getOpenAIClient({ req, res });
@@ -83,16 +63,18 @@ router.get('/:id', async (req, res) => {
     logger.error('[/assistants/:id] Error retrieving assistant', error);
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 /**
  * Modifies an assistant.
  * @route PATCH /assistants/:id
+ * @param {object} req - Express Request
+ * @param {object} req.params - Request params
  * @param {string} req.params.id - Assistant identifier.
  * @param {AssistantUpdateParams} req.body - The assistant update parameters.
  * @returns {Assistant} 200 - success response - application/json
  */
-router.patch('/:id', async (req, res) => {
+const patchAssistant = async (req, res) => {
   try {
     const { openai } = await getOpenAIClient({ req, res });
 
@@ -118,15 +100,17 @@ router.patch('/:id', async (req, res) => {
     logger.error('[/assistants/:id] Error updating assistant', error);
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 /**
  * Deletes an assistant.
  * @route DELETE /assistants/:id
+ * @param {object} req - Express Request
+ * @param {object} req.params - Request params
  * @param {string} req.params.id - Assistant identifier.
  * @returns {Assistant} 200 - success response - application/json
  */
-router.delete('/:id', async (req, res) => {
+const deleteAssistant = async (req, res) => {
   try {
     const { openai } = await getOpenAIClient({ req, res });
 
@@ -137,15 +121,16 @@ router.delete('/:id', async (req, res) => {
     logger.error('[/assistants/:id] Error deleting assistant', error);
     res.status(500).json({ error: 'Error deleting assistant' });
   }
-});
+};
 
 /**
  * Returns a list of assistants.
  * @route GET /assistants
+ * @param {object} req - Express Request
  * @param {AssistantListParams} req.query - The assistant list parameters for pagination and sorting.
  * @returns {AssistantListResponse} 200 - success response - application/json
  */
-router.get('/', async (req, res) => {
+const listAssistants = async (req, res) => {
   try {
     const body = await fetchAssistants(req, res);
 
@@ -165,31 +150,34 @@ router.get('/', async (req, res) => {
     logger.error('[/assistants] Error listing assistants', error);
     res.status(500).json({ message: 'Error listing assistants' });
   }
-});
+};
 
 /**
  * Returns a list of the user's assistant documents (metadata saved to database).
  * @route GET /assistants/documents
  * @returns {AssistantDocument[]} 200 - success response - application/json
  */
-router.get('/documents', async (req, res) => {
+const getAssistantDocuments = async (req, res) => {
   try {
     res.json(await getAssistants({ user: req.user.id }));
   } catch (error) {
     logger.error('[/assistants/documents] Error listing assistant documents', error);
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 /**
  * Uploads and updates an avatar for a specific assistant.
  * @route POST /avatar/:assistant_id
+ * @param {object} req - Express Request
+ * @param {object} req.params - Request params
  * @param {string} req.params.assistant_id - The ID of the assistant.
  * @param {Express.Multer.File} req.file - The avatar image file.
+ * @param {object} req.body - Request body
  * @param {string} [req.body.metadata] - Optional metadata for the assistant's avatar.
  * @returns {Object} 200 - success response - application/json
  */
-router.post('/avatar/:assistant_id', upload.single('file'), async (req, res) => {
+const uploadAssistantAvatar = async (req, res) => {
   try {
     const { assistant_id } = req.params;
     if (!assistant_id) {
@@ -252,6 +240,14 @@ router.post('/avatar/:assistant_id', upload.single('file'), async (req, res) => 
     logger.error(message, error);
     res.status(500).json({ message });
   }
-});
+};
 
-module.exports = router;
+module.exports = {
+  createAssistant,
+  retrieveAssistant,
+  patchAssistant,
+  deleteAssistant,
+  listAssistants,
+  getAssistantDocuments,
+  uploadAssistantAvatar,
+};

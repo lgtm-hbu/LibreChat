@@ -4,19 +4,18 @@ const {
 } = require('~/server/services/Endpoints/azureAssistants');
 const { initializeClient } = require('~/server/services/Endpoints/assistants');
 
-// const TESTING = undefined;
-const TESTING = 'v1';
 /**
  * @param {Express.Request} req
  * @returns {string}
  */
 const getCurrentVersion = (req) => {
-  if (TESTING) {
-    return TESTING;
-  }
-
   const index = req.baseUrl.lastIndexOf('/v');
-  return index !== -1 ? req.baseUrl.substring(index + 1, index + 3) : null;
+  const version = index !== -1 ? req.baseUrl.substring(index + 1, index + 3) : null;
+  if (!version.startsWith('v') && version.length !== 2) {
+    throw new Error(`[${req.baseUrl}] Invalid version`);
+  }
+  console.debug(`[${req.baseUrl}] Current version: ${version}`);
+  return version;
 };
 
 /**
