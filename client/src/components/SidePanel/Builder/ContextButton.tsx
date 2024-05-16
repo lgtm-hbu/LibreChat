@@ -2,12 +2,12 @@ import * as Popover from '@radix-ui/react-popover';
 import type { Assistant, AssistantCreateParams, AssistantsEndpoint } from 'librechat-data-provider';
 import type { UseMutationResult } from '@tanstack/react-query';
 import { Dialog, DialogTrigger, Label } from '~/components/ui';
-import DialogTemplate from '~/components/ui/DialogTemplate';
+import { useChatContext, useToastContext } from '~/Providers';
 import { useDeleteAssistantMutation } from '~/data-provider';
+import DialogTemplate from '~/components/ui/DialogTemplate';
 import { useLocalize, useSetIndexOptions } from '~/hooks';
 import { cn, removeFocusOutlines } from '~/utils/';
 import { NewTrashIcon } from '~/components/svg';
-import { useChatContext } from '~/Providers';
 
 export default function ContextButton({
   activeModel,
@@ -23,6 +23,7 @@ export default function ContextButton({
   endpoint: AssistantsEndpoint;
 }) {
   const localize = useLocalize();
+  const { showToast } = useToastContext();
   const { conversation } = useChatContext();
   const { setOption } = useSetIndexOptions();
 
@@ -32,6 +33,11 @@ export default function ContextButton({
       if (!updatedList) {
         return;
       }
+
+      showToast({
+        message: localize('com_ui_assistant_deleted'),
+        status: 'success',
+      });
 
       if (createMutation.data?.id) {
         console.log('[deleteAssistant] resetting createMutation');
@@ -56,6 +62,13 @@ export default function ContextButton({
       }
 
       setCurrentAssistantId(firstAssistant.id);
+    },
+    onError: (error) => {
+      console.error(error);
+      showToast({
+        message: localize('com_ui_assistant_delete_error'),
+        status: 'error',
+      });
     },
   });
 
