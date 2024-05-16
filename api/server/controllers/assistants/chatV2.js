@@ -7,7 +7,6 @@ const {
   ContentTypes,
   EModelEndpoint,
   ViolationTypes,
-  ImageVisionTool,
   AssistantStreamEvents,
 } = require('librechat-data-provider');
 const {
@@ -20,7 +19,6 @@ const {
 } = require('~/server/services/Threads');
 const { sendResponse, sendMessage, sleep, isEnabled, countTokens } = require('~/server/utils');
 const { runAssistant, createOnTextProgress } = require('~/server/services/AssistantService');
-const { formatMessage, createVisionPrompt } = require('~/app/clients/prompts');
 const { createRun, StreamRunManager } = require('~/server/services/Runs');
 const { addTitle } = require('~/server/services/Endpoints/assistants');
 const { getTransactions } = require('~/models/Transaction');
@@ -102,8 +100,6 @@ const chatV2 = async (req, res) => {
   let attachedFileIds = new Set();
   /** @type {TMessage | null} */
   let requestMessage = null;
-  /** @type {undefined | Promise<ChatCompletion>} */
-  let visionPromise;
 
   const userMessageId = v4();
   const responseMessageId = v4();
@@ -353,63 +349,9 @@ const chatV2 = async (req, res) => {
       }
     };
 
-    const addVisionPrompt = async () => {
-      if (!req.body.endpointOption.attachments) {
-        return;
-      }
-
-      /** @type {MongoFile[]} */
-      const attachments = await req.body.endpointOption.attachments;
-      if (
-        attachments &&
-        attachments.every((attachment) => attachment.source === FileSources.openai)
-      ) {
-        return;
-      }
-
-      const assistant = await openai.beta.assistants.retrieve(assistant_id);
-      const visionToolIndex = assistant.tools.findIndex(
-        (tool) => tool?.function && tool?.function?.name === ImageVisionTool.function.name,
-      );
-
-      if (visionToolIndex === -1) {
-        return;
-      }
-
-      let visionMessage = {
-        role: 'user',
-        content: '',
-      };
-      const files = await client.addImageURLs(visionMessage, attachments);
-      if (!visionMessage.image_urls?.length) {
-        return;
-      }
-
-      const imageCount = visionMessage.image_urls.length;
-      const plural = imageCount > 1;
-      visionMessage.content = createVisionPrompt(plural);
-      visionMessage = formatMessage({ message: visionMessage, endpoint: EModelEndpoint.openAI });
-
-      visionPromise = openai.chat.completions.create({
-        model: 'gpt-4-vision-preview',
-        messages: [visionMessage],
-        max_tokens: 4000,
-      });
-
-      const pluralized = plural ? 's' : '';
-      body.additional_instructions = `${
-        body.additional_instructions ? `${body.additional_instructions}\n` : ''
-      }The user has uploaded ${imageCount} image${pluralized}.
-      Use the \`${ImageVisionTool.function.name}\` tool to retrieve ${
-  plural ? '' : 'a '
-}detailed text description${pluralized} for ${plural ? 'each' : 'the'} image${pluralized}.`;
-
-      return files;
-    };
-
     const initializeThread = async () => {
       /** @type {[ undefined | MongoFile[]]}*/
-      const [processedFiles] = await Promise.all([addVisionPrompt(), getRequestFileIds()]);
+      const processedFiles = await getRequestFileIds();
       // TODO: may allow multiple messages to be created beforehand in a future update
       const initThreadBody = {
         messages: [userMessage],
@@ -507,7 +449,6 @@ const chatV2 = async (req, res) => {
       if (endpoint === EModelEndpoint.azureAssistants) {
         body.model = openai._options.model;
         openai.attachedFileIds = attachedFileIds;
-        openai.visionPromise = visionPromise;
         if (retry) {
           response = await runAssistant({
             openai,
@@ -552,7 +493,6 @@ const chatV2 = async (req, res) => {
         openai,
         handlers,
         thread_id,
-        visionPromise,
         attachedFileIds,
         responseMessage: openai.responseMessage,
         // streamOptions: {

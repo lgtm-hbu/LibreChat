@@ -3,6 +3,7 @@ const {
   Constants,
   AuthTypeEnum,
   actionDelimiter,
+  isImageVisionTool,
   actionDomainSeparator,
 } = require('librechat-data-provider');
 const { encryptV2, decryptV2 } = require('~/server/utils/crypto');
@@ -17,12 +18,15 @@ const toolNameRegex = /^[a-zA-Z0-9_-]+$/;
  * Validates tool name against regex pattern and updates if necessary.
  * @param {object} params - The parameters for the function.
  * @param {object} params.req - Express Request.
- * @param {object} params.tool - The tool object.
+ * @param {FunctionTool} params.tool - The tool object.
  * @param {string} params.assistant_id - The assistant ID
  * @returns {object|null} - Updated tool object or null if invalid and not an action.
  */
 const validateAndUpdateTool = async ({ req, tool, assistant_id }) => {
   let actions;
+  if (isImageVisionTool(tool)) {
+    return null;
+  }
   if (!toolNameRegex.test(tool.function.name)) {
     const [functionName, domain] = tool.function.name.split(actionDelimiter);
     actions = await getActions({ assistant_id, user: req.user.id }, true);
