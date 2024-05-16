@@ -34,7 +34,7 @@ router.use('/tools', tools);
  */
 router.post('/', async (req, res) => {
   try {
-    const openai = await getOpenAIClient({ req, res });
+    const { openai } = await getOpenAIClient({ req, res });
 
     const { tools = [], endpoint: _e, ...assistantData } = req.body;
     assistantData.tools = tools
@@ -74,7 +74,7 @@ router.post('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     /* NOTE: not actually being used right now */
-    const openai = await getOpenAIClient({ req, res });
+    const { openai } = await getOpenAIClient({ req, res });
 
     const assistant_id = req.params.id;
     const assistant = await openai.beta.assistants.retrieve(assistant_id);
@@ -94,7 +94,7 @@ router.get('/:id', async (req, res) => {
  */
 router.patch('/:id', async (req, res) => {
   try {
-    const openai = await getOpenAIClient({ req, res });
+    const { openai } = await getOpenAIClient({ req, res });
 
     const assistant_id = req.params.id;
     const { endpoint: _e, ...updateData } = req.body;
@@ -128,7 +128,7 @@ router.patch('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
   try {
-    const openai = await getOpenAIClient({ req, res });
+    const { openai } = await getOpenAIClient({ req, res });
 
     const assistant_id = req.params.id;
     const deletionStatus = await openai.beta.assistants.del(assistant_id);
@@ -197,7 +197,7 @@ router.post('/avatar/:assistant_id', upload.single('file'), async (req, res) => 
     }
 
     let { metadata: _metadata = '{}' } = req.body;
-    const openai = await getOpenAIClient({ req, res });
+    const { openai } = await getOpenAIClient({ req, res });
 
     const image = await uploadImageBuffer({
       req,

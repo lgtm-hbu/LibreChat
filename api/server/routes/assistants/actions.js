@@ -55,7 +55,7 @@ router.post('/:assistant_id', async (req, res) => {
     const action_id = _action_id ?? v4();
     const initialPromises = [];
 
-    const openai = await getOpenAIClient({ req, res });
+    const { openai } = await getOpenAIClient({ req, res });
 
     initialPromises.push(getAssistant({ assistant_id }));
     initialPromises.push(openai.beta.assistants.retrieve(assistant_id));
@@ -156,7 +156,7 @@ router.delete('/:assistant_id/:action_id/:model', async (req, res) => {
   try {
     const { assistant_id, action_id, model } = req.params;
     req.body.model = model;
-    const openai = await getOpenAIClient({ req, res });
+    const { openai } = await getOpenAIClient({ req, res });
 
     const initialPromises = [];
     initialPromises.push(getAssistant({ assistant_id }));
