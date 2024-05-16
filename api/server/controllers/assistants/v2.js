@@ -72,7 +72,7 @@ const patchAssistant = async (req, res) => {
         continue;
       }
 
-      const updatedTool = await validateAndUpdateTool(req, actualTool);
+      const updatedTool = await validateAndUpdateTool({ req, tool: actualTool, assistant_id });
       if (updatedTool) {
         tools.push(updatedTool);
       }

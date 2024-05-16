@@ -14,20 +14,33 @@ const toolNameRegex = /^[a-zA-Z0-9_-]+$/;
 
 /**
  * Validates tool name against regex pattern and updates if necessary.
- * @param {object} req - Express Request.
- * @param {object} tool - The tool object.
+ * @param {object} params - The parameters for the function.
+ * @param {object} params.req - Express Request.
+ * @param {object} params.tool - The tool object.
+ * @param {string} params.assistant_id - The assistant ID
  * @returns {object|null} - Updated tool object or null if invalid and not an action.
  */
-const validateAndUpdateTool = async (req, tool) => {
+const validateAndUpdateTool = async ({ req, tool, assistant_id }) => {
+  let actions;
   if (!toolNameRegex.test(tool.function.name)) {
-    const [domain, _actionId] = tool.function.name.split(actionDelimiter);
+    const [functionName, domain] = tool.function.name.split(actionDelimiter);
+    actions = await getActions({ assistant_id, user: req.user.id }, true);
+    const matchingActions = actions.filter((action) => {
+      const metadata = action.metadata;
+      return metadata && metadata.domain === domain;
+    });
+    const action = matchingActions[0];
+    if (!action) {
+      return null;
+    }
+
     const parsedDomain = await domainParser(req, domain, true);
 
     if (!parsedDomain) {
       return null;
     }
 
-    tool.function.name = `${tool.function.name}${actionDelimiter}${parsedDomain}`;
+    tool.function.name = `${functionName}${actionDelimiter}${parsedDomain}`;
   }
   return tool;
 };
