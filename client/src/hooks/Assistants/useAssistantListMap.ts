@@ -12,12 +12,12 @@ const selectAssistantsResponse = (res: AssistantListResponse): AssistantListItem
     model,
   }));
 
-export default function useAssistantListMap<T = AssistantListItem[]>(
+export default function useAssistantListMap<T = AssistantListItem[] | null>(
   selector: (res: AssistantListResponse) => T = selectAssistantsResponse as (
     res: AssistantListResponse,
   ) => T,
 ): Record<AssistantsEndpoint, T> {
-  const { data: assistantsList = [] } = useListAssistantsQuery(
+  const { data: assistantsList = null } = useListAssistantsQuery(
     EModelEndpoint.assistants,
     undefined,
     {
@@ -25,7 +25,7 @@ export default function useAssistantListMap<T = AssistantListItem[]>(
     },
   );
 
-  const { data: azureAssistants = [] } = useListAssistantsQuery(
+  const { data: azureAssistants = null } = useListAssistantsQuery(
     EModelEndpoint.azureAssistants,
     undefined,
     {
