@@ -29,7 +29,9 @@ const initializeClient = async ({ req, res, endpointOption, version, initAppClie
   let baseURL = userProvidesURL ? userValues.baseURL : ASSISTANTS_BASE_URL;
 
   const opts = {
-    'OpenAI-Beta': `assistants=${version}`,
+    defaultHeaders: {
+      'OpenAI-Beta': `assistants=${version}`,
+    },
   };
 
   const clientOptions = {
