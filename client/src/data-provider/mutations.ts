@@ -284,9 +284,10 @@ export const useUploadFileMutation = (
   const { onSuccess, ...options } = _options || {};
   return useMutation([MutationKeys.fileUpload], {
     mutationFn: (body: FormData) => {
-      const height = body.get('height');
       const width = body.get('width');
-      if (height && width) {
+      const height = body.get('height');
+      const version = body.get('version') as number | string;
+      if (height && width && (!version || version != 2)) {
         return dataService.uploadImage(body);
       }
 

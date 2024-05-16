@@ -1,18 +1,35 @@
-const { EModelEndpoint } = require('librechat-data-provider');
+const {
+  EModelEndpoint,
+  FileSources,
+  CacheKeys,
+  defaultAssistantsVersion,
+} = require('librechat-data-provider');
 const {
   initializeClient: initAzureClient,
 } = require('~/server/services/Endpoints/azureAssistants');
 const { initializeClient } = require('~/server/services/Endpoints/assistants');
+const { getLogStores } = require('~/cache');
 
 /**
  * @param {Express.Request} req
- * @returns {string}
+ * @param {string} [endpoint]
+ * @returns {Promise<string>}
  */
-const getCurrentVersion = (req) => {
+const getCurrentVersion = async (req, endpoint) => {
   const index = req.baseUrl.lastIndexOf('/v');
-  const version = index !== -1 ? req.baseUrl.substring(index + 1, index + 3) : null;
-  if (!version.startsWith('v') && version.length !== 2) {
-    throw new Error(`[${req.baseUrl}] Invalid version`);
+  let version = index !== -1 ? req.baseUrl.substring(index + 1, index + 3) : null;
+  if (!version && req.body.version) {
+    version = `v${req.body.version}`;
+  }
+  if (!version && endpoint) {
+    const cache = getLogStores(CacheKeys.CONFIG_STORE);
+    const cachedEndpointsConfig = await cache.get(CacheKeys.ENDPOINT_CONFIG);
+    version = `v${
+      cachedEndpointsConfig?.[endpoint]?.version ?? defaultAssistantsVersion[endpoint]
+    }`;
+  }
+  if (!version?.startsWith('v') && version.length !== 2) {
+    throw new Error(`[${req.baseUrl}] Invalid version: ${version}`);
   }
   console.debug(`[${req.baseUrl}] Current version: ${version}`);
   return version;
@@ -106,8 +123,13 @@ const listAssistantsForAzure = async ({ req, res, version, azureConfig = {}, que
 };
 
 async function getOpenAIClient({ req, res, endpointOption, initAppClient }) {
-  const version = getCurrentVersion(req);
-  const endpoint = req.body.endpoint ?? req.query.endpoint;
+  let endpoint = req.body.endpoint ?? req.query.endpoint;
+  if (!endpoint && req.baseUrl.includes('files') && req.body.files) {
+    const source = req.body.files[0]?.source;
+    endpoint =
+      source === FileSources.openai ? EModelEndpoint.assistants : EModelEndpoint.azureAssistants;
+  }
+  const version = await getCurrentVersion(req, endpoint);
   if (!endpoint) {
     throw new Error(`[${req.baseUrl}] Endpoint is required`);
   }
@@ -123,8 +145,8 @@ async function getOpenAIClient({ req, res, endpointOption, initAppClient }) {
 }
 
 const fetchAssistants = async (req, res) => {
-  const version = getCurrentVersion(req);
   const { limit = 100, order = 'desc', after, before, endpoint } = req.query;
+  const version = await getCurrentVersion(req, endpoint);
   const query = { limit, order, after, before };
 
   /** @type {AssistantListResponse} */

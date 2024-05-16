@@ -14,12 +14,15 @@ const {
   isAssistantsEndpoint,
 } = require('librechat-data-provider');
 const { convertImage, resizeAndConvert } = require('~/server/services/Files/images');
-const { initializeClient } = require('~/server/services/Endpoints/assistants');
+const { getOpenAIClient } = require('~/server/controllers/assistants/helpers');
 const { createFile, updateFileUsage, deleteFiles } = require('~/models/File');
 const { LB_QueueAsyncCall } = require('~/server/utils/queue');
 const { getStrategyFunctions } = require('./strategies');
 const { determineFileType } = require('~/server/utils');
 const { logger } = require('~/config');
+
+const checkOpenAIStorage = (source) =>
+  source === FileSources.openai || source === FileSources.azure;
 
 const processFiles = async (files) => {
   const promises = [];
@@ -42,7 +45,7 @@ const processFiles = async (files) => {
  * @param {OpenAI | undefined} [openai] - If an OpenAI file, the initialized OpenAI client.
  */
 function enqueueDeleteOperation(req, file, deleteFile, promises, openai) {
-  if (file.source === FileSources.openai) {
+  if (checkOpenAIStorage(file.source)) {
     // Enqueue to leaky bucket
     promises.push(
       new Promise((resolve, reject) => {
@@ -94,14 +97,14 @@ const processDeleteRequest = async ({ req, files }) => {
   /** @type {OpenAI | undefined} */
   let openai;
   if (req.body.assistant_id) {
-    ({ openai } = await initializeClient({ req }));
+    ({ openai } = await getOpenAIClient({ req }));
   }
 
   for (const file of files) {
     const source = file.source ?? FileSources.local;
 
-    if (source === FileSources.openai && !openai) {
-      ({ openai } = await initializeClient({ req }));
+    if (checkOpenAIStorage(source) && !openai) {
+      ({ openai } = await getOpenAIClient({ req }));
     }
 
     if (req.body.assistant_id) {
@@ -284,11 +287,11 @@ const processFileUpload = async ({ req, res, file, metadata }) => {
 
   /** @type {OpenAI | undefined} */
   let openai;
-  if (source === FileSources.openai) {
-    ({ openai } = await initializeClient({ req }));
+  if (checkOpenAIStorage(source)) {
+    ({ openai } = await getOpenAIClient({ req }));
   }
 
-  const { id, bytes, filename, filepath, embedded } = await handleFileUpload({
+  const { id, bytes, filename, filepath, embedded, height, width } = await handleFileUpload({
     req,
     file,
     file_id,
@@ -314,6 +317,8 @@ const processFileUpload = async ({ req, res, file, metadata }) => {
       type: file.mimetype,
       embedded,
       source,
+      height,
+      width,
     },
     true,
   );
@@ -503,7 +508,12 @@ async function retrieveAndProcessFile({
  * Filters a file based on its size and the endpoint origin.
  *
  * @param {Object} params - The parameters for the function.
- * @param {Express.Request} params.req - The request object from Express.
+ * @param {object} params.req - The request object from Express.
+ * @param {string} [params.req.endpoint]
+ * @param {string} [params.req.file_id]
+ * @param {number} [params.req.width]
+ * @param {number} [params.req.height]
+ * @param {number} [params.req.version]
  * @param {Express.Multer.File} params.file - The file uploaded to the server via multer.
  * @param {boolean} [params.image] - Whether the file expected is an image.
  * @returns {void}

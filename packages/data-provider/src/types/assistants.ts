@@ -342,6 +342,7 @@ export type AssistantDocument = {
 };
 
 export enum FilePurpose {
+  Vision = 'vision',
   FineTune = 'fine-tune',
   FineTuneResults = 'fine-tune-results',
   Assistants = 'assistants',
