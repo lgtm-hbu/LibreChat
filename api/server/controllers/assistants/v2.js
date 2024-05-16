@@ -1,3 +1,4 @@
+const { validateAndUpdateTool } = require('~/server/services/ActionService');
 const { getOpenAIClient } = require('./helpers');
 const { logger } = require('~/config');
 
@@ -55,15 +56,29 @@ const patchAssistant = async (req, res) => {
 
     const assistant_id = req.params.id;
     const { endpoint: _e, ...updateData } = req.body;
-    updateData.tools = (updateData.tools ?? [])
-      .map((tool) => {
-        if (typeof tool !== 'string') {
-          return tool;
-        }
+    updateData.tools = updateData.tools ?? [];
 
-        return req.app.locals.availableTools[tool];
-      })
-      .filter((tool) => tool);
+    const tools = [];
+
+    for (const tool of updateData.tools ?? []) {
+      let actualTool = typeof tool === 'string' ? req.app.locals.availableTools[tool] : tool;
+
+      if (!actualTool) {
+        continue;
+      }
+
+      if (!actualTool.function) {
+        tools.push(actualTool);
+        continue;
+      }
+
+      const updatedTool = await validateAndUpdateTool(req, actualTool);
+      if (updatedTool) {
+        tools.push(updatedTool);
+      }
+    }
+
+    updateData.tools = tools;
 
     if (openai.locals?.azureOptions && updateData.model) {
       updateData.model = openai.locals.azureOptions.azureOpenAIApiDeploymentName;

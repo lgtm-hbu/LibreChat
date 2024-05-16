@@ -1,20 +1,41 @@
 const {
-  AuthTypeEnum,
-  EModelEndpoint,
-  actionDomainSeparator,
   CacheKeys,
   Constants,
+  AuthTypeEnum,
+  actionDelimiter,
+  actionDomainSeparator,
 } = require('librechat-data-provider');
 const { encryptV2, decryptV2 } = require('~/server/utils/crypto');
 const { getActions } = require('~/models/Action');
 const { getLogStores } = require('~/cache');
 const { logger } = require('~/config');
 
+const toolNameRegex = /^[a-zA-Z0-9_-]+$/;
+
+/**
+ * Validates tool name against regex pattern and updates if necessary.
+ * @param {object} req - Express Request.
+ * @param {object} tool - The tool object.
+ * @returns {object|null} - Updated tool object or null if invalid and not an action.
+ */
+const validateAndUpdateTool = async (req, tool) => {
+  if (!toolNameRegex.test(tool.function.name)) {
+    const [domain, _actionId] = tool.function.name.split(actionDelimiter);
+    const parsedDomain = await domainParser(req, domain, true);
+
+    if (!parsedDomain) {
+      return null;
+    }
+
+    tool.function.name = `${tool.function.name}${actionDelimiter}${parsedDomain}`;
+  }
+  return tool;
+};
+
 /**
  * Encodes or decodes a domain name to/from base64, or replacing periods with a custom separator.
  *
- * Necessary because Azure OpenAI Assistants API doesn't support periods in function
- * names due to `[a-zA-Z0-9_-]*` Regex Validation, limited to a 64-character maximum.
+ * Necessary due to `[a-zA-Z0-9_-]*` Regex Validation, limited to a 64-character maximum.
  *
  * @param {Express.Request} req - The Express Request object.
  * @param {string} domain - The domain name to encode/decode.
@@ -24,10 +45,6 @@ const { logger } = require('~/config');
 async function domainParser(req, domain, inverse = false) {
   if (!domain) {
     return;
-  }
-
-  if (!req.app.locals[EModelEndpoint.azureOpenAI]?.assistants) {
-    return domain;
   }
 
   const domainsCache = getLogStores(CacheKeys.ENCODED_DOMAINS);
@@ -171,9 +188,10 @@ function decryptMetadata(metadata) {
 }
 
 module.exports = {
-  loadActionSets,
+  validateAndUpdateTool,
   createActionTool,
   encryptMetadata,
   decryptMetadata,
+  loadActionSets,
   domainParser,
 };

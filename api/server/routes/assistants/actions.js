@@ -45,7 +45,6 @@ router.post('/:assistant_id', async (req, res) => {
     let metadata = encryptMetadata(_metadata);
 
     let { domain } = metadata;
-    /* Azure doesn't support periods in function names */
     domain = await domainParser(req, domain, true);
 
     if (!domain) {
