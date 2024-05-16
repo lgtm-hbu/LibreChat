@@ -184,12 +184,13 @@ const processFileURL = async ({ fileStrategy, userId, URL, fileName, basePath, c
  *
  * @param {Object} params - The parameters object.
  * @param {Express.Request} params.req - The Express request object.
- * @param {Express.Response} params.res - The Express response object.
+ * @param {Express.Response} [params.res] - The Express response object.
  * @param {Express.Multer.File} params.file - The uploaded file.
  * @param {ImageMetadata} params.metadata - Additional metadata for the file.
+ * @param {boolean} params.returnFile - Whether to return the file metadata or return response as normal.
  * @returns {Promise<void>}
  */
-const processImageFile = async ({ req, res, file, metadata }) => {
+const processImageFile = async ({ req, res, file, metadata, returnFile = false }) => {
   const source = req.app.locals.fileStrategy;
   const { handleImageUpload } = getStrategyFunctions(source);
   const { file_id, temp_file_id, endpoint } = metadata;
@@ -217,6 +218,10 @@ const processImageFile = async ({ req, res, file, metadata }) => {
     },
     true,
   );
+
+  if (returnFile) {
+    return result;
+  }
   res.status(200).json({ message: 'File uploaded and processed successfully', ...result });
 };
 
@@ -291,7 +296,15 @@ const processFileUpload = async ({ req, res, file, metadata }) => {
     ({ openai } = await getOpenAIClient({ req }));
   }
 
-  const { id, bytes, filename, filepath, embedded, height, width } = await handleFileUpload({
+  const {
+    id,
+    bytes,
+    filename,
+    filepath: _filepath,
+    embedded,
+    height,
+    width,
+  } = await handleFileUpload({
     req,
     file,
     file_id,
@@ -304,14 +317,25 @@ const processFileUpload = async ({ req, res, file, metadata }) => {
     });
   }
 
+  let filepath = isAssistantUpload ? `${openai.baseURL}/files/${id}` : _filepath;
+  if (isAssistantUpload && file.mimetype.startsWith('image')) {
+    const result = await processImageFile({
+      req,
+      file,
+      metadata: { file_id: v4() },
+      returnFile: true,
+    });
+    filepath = result.filepath;
+  }
+
   const result = await createFile(
     {
       user: req.user.id,
       file_id: id ?? file_id,
       temp_file_id,
       bytes,
+      filepath,
       filename: filename ?? file.originalname,
-      filepath: isAssistantUpload ? `${openai.baseURL}/files/${id}` : filepath,
       context: isAssistantUpload ? FileContext.assistants : FileContext.message_attachment,
       model: isAssistantUpload ? req.body.model : undefined,
       type: file.mimetype,
