@@ -21,14 +21,15 @@ const {
 } = require('~/server/services/Threads');
 const { sendResponse, sendMessage, sleep, isEnabled, countTokens } = require('~/server/utils');
 const { runAssistant, createOnTextProgress } = require('~/server/services/AssistantService');
-const { addTitle, initializeClient } = require('~/server/services/Endpoints/assistants');
 const { formatMessage, createVisionPrompt } = require('~/app/clients/prompts');
 const { createRun, StreamRunManager } = require('~/server/services/Runs');
+const { addTitle } = require('~/server/services/Endpoints/assistants');
 const { getTransactions } = require('~/models/Transaction');
 const checkBalance = require('~/models/checkBalance');
 const { getConvo } = require('~/models/Conversation');
 const getLogStores = require('~/cache/getLogStores');
 const { getModelMaxTokens } = require('~/utils');
+const { getOpenAIClient } = require('./helpers');
 const { logger } = require('~/config');
 
 const router = express.Router();
@@ -150,7 +151,7 @@ router.post('/', validateModel, buildEndpointOption, setHeaders, async (req, res
       logger.debug('[/assistants/chat/] Request aborted on close');
     } else if (/Files.*are invalid/.test(error.message)) {
       const errorMessage = `Files are invalid, or may not have uploaded yet.${
-        req.app.locals?.[EModelEndpoint.azureOpenAI].assistants
+        endpoint === EModelEndpoint.azureAssistants
           ? ' If using Azure OpenAI, files are only available in the region of the assistant\'s model at the time of upload.'
           : ''
       }`;
@@ -312,8 +313,7 @@ router.post('/', validateModel, buildEndpointOption, setHeaders, async (req, res
       });
     };
 
-    /** @type {{ openai: OpenAIClient }} */
-    const { openai: _openai, client } = await initializeClient({
+    const { openai: _openai, client } = await getOpenAIClient({
       req,
       res,
       endpointOption: req.body.endpointOption,
@@ -515,7 +515,7 @@ router.post('/', validateModel, buildEndpointOption, setHeaders, async (req, res
     let response;
 
     const processRun = async (retry = false) => {
-      if (req.app.locals[EModelEndpoint.azureOpenAI]?.assistants) {
+      if (endpoint === EModelEndpoint.azureAssistants) {
         body.model = openai._options.model;
         openai.attachedFileIds = attachedFileIds;
         openai.visionPromise = visionPromise;

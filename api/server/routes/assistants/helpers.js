@@ -106,7 +106,7 @@ const listAssistantsForAzure = async ({ req, res, version, azureConfig = {}, que
   };
 };
 
-async function getOpenAIClient({ req, res }) {
+async function getOpenAIClient({ req, res, endpointOption, initAppClient }) {
   const version = getCurrentVersion(req);
   const endpoint = req.body.endpoint ?? req.query.endpoint;
   if (!endpoint) {
@@ -115,9 +115,9 @@ async function getOpenAIClient({ req, res }) {
 
   let result;
   if (endpoint === EModelEndpoint.assistants) {
-    result = await initializeClient({ req, res, version });
+    result = await initializeClient({ req, res, version, endpointOption, initAppClient });
   } else if (endpoint === EModelEndpoint.azureAssistants) {
-    result = await initAzureClient({ req, res, version });
+    result = await initAzureClient({ req, res, version, endpointOption, initAppClient });
   }
 
   return result;
