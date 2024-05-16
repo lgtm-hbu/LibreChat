@@ -1,5 +1,6 @@
 const { FileContext } = require('librechat-data-provider');
 const { getStrategyFunctions } = require('~/server/services/Files/strategies');
+const { deleteAssistantActions } = require('~/server/services/ActionService');
 const { uploadImageBuffer } = require('~/server/services/Files/process');
 const { updateAssistant, getAssistants } = require('~/models/Assistant');
 const { getOpenAIClient, fetchAssistants } = require('./helpers');
@@ -116,6 +117,9 @@ const deleteAssistant = async (req, res) => {
 
     const assistant_id = req.params.id;
     const deletionStatus = await openai.beta.assistants.del(assistant_id);
+    if (deletionStatus?.deleted) {
+      await deleteAssistantActions({ req, assistant_id });
+    }
     res.json(deletionStatus);
   } catch (error) {
     logger.error('[/assistants/:id] Error deleting assistant', error);

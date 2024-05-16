@@ -6,7 +6,8 @@ const {
   actionDomainSeparator,
 } = require('librechat-data-provider');
 const { encryptV2, decryptV2 } = require('~/server/utils/crypto');
-const { getActions } = require('~/models/Action');
+const { getActions, deleteActions } = require('~/models/Action');
+const { deleteAssistant } = require('~/models/Assistant');
 const { getLogStores } = require('~/cache');
 const { logger } = require('~/config');
 
@@ -200,7 +201,25 @@ function decryptMetadata(metadata) {
   return decryptedMetadata;
 }
 
+/**
+ * Deletes an action and its corresponding assistant.
+ * @param {Object} params - The parameters for the function.
+ * @param {OpenAIClient} params.req - The Express Request object.
+ * @param {string} params.assistant_id - The ID of the assistant.
+ */
+const deleteAssistantActions = async ({ req, assistant_id }) => {
+  try {
+    await deleteActions({ assistant_id, user: req.user.id });
+    await deleteAssistant({ assistant_id, user: req.user.id });
+  } catch (error) {
+    const message = 'Trouble deleting Assistant Actions for Assistant ID: ' + assistant_id;
+    logger.error(message, error);
+    throw new Error(message);
+  }
+};
+
 module.exports = {
+  deleteAssistantActions,
   validateAndUpdateTool,
   createActionTool,
   encryptMetadata,
