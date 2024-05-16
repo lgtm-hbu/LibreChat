@@ -360,7 +360,6 @@ const chatV2 = async (req, res) => {
               type: ContentTypes.IMAGE_FILE,
               [ContentTypes.IMAGE_FILE]: { file_id: file.file_id },
             });
-            continue;
           }
 
           if (!userMessage.attachments) {
@@ -371,6 +370,10 @@ const chatV2 = async (req, res) => {
             file_id: file.file_id,
             tools: [{ type: ToolCallTypes.CODE_INTERPRETER }],
           });
+
+          if (file.type.startsWith('image')) {
+            continue;
+          }
 
           const mimeType = file.type;
           const isSupportedByRetrieval = retrievalMimeTypes.some((regex) => regex.test(mimeType));
