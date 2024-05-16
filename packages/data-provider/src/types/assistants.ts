@@ -210,6 +210,7 @@ export enum StepTypes {
 export enum ToolCallTypes {
   FUNCTION = 'function',
   RETRIEVAL = 'retrieval',
+  FILE_SEARCH = 'file_search',
   CODE_INTERPRETER = 'code_interpreter',
 }
 

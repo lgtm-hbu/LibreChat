@@ -3,10 +3,11 @@ const {
   Constants,
   RunStatus,
   CacheKeys,
-  FileSources,
   ContentTypes,
+  ToolCallTypes,
   EModelEndpoint,
   ViolationTypes,
+  retrievalMimeTypes,
   AssistantStreamEvents,
 } = require('librechat-data-provider');
 const {
@@ -44,6 +45,7 @@ const ten_minutes = 1000 * 60 * 10;
 const chatV2 = async (req, res) => {
   logger.debug('[/assistants/chat/] req.body', req.body);
 
+  /** @type {{ files: MongoFile[]}} */
   const {
     text,
     model,
@@ -313,7 +315,12 @@ const chatV2 = async (req, res) => {
 
     let userMessage = {
       role: 'user',
-      content: text,
+      content: [
+        {
+          type: ContentTypes.TEXT,
+          text,
+        },
+      ],
       metadata: {
         messageId: userMessageId,
       },
@@ -342,16 +349,45 @@ const chatV2 = async (req, res) => {
         }
       }
 
-      file_ids = files.map(({ file_id }) => file_id);
-      if (file_ids.length || thread_file_ids.length) {
-        userMessage.file_ids = file_ids;
+      if (files.length || thread_file_ids.length) {
         attachedFileIds = new Set([...file_ids, ...thread_file_ids]);
+
+        let attachmentIndex = 0;
+        for (const file of files) {
+          file_ids.push(file.file_id);
+          if (file.type.startsWith('image')) {
+            userMessage.content.push({
+              type: ContentTypes.IMAGE_FILE,
+              [ContentTypes.IMAGE_FILE]: { file_id: file.file_id },
+            });
+            continue;
+          }
+
+          if (!userMessage.attachments) {
+            userMessage.attachments = [];
+          }
+
+          userMessage.attachments.push({
+            file_id: file.file_id,
+            tools: [{ type: ToolCallTypes.CODE_INTERPRETER }],
+          });
+
+          const mimeType = file.type;
+          const isSupportedByRetrieval = retrievalMimeTypes.some((regex) => regex.test(mimeType));
+          if (isSupportedByRetrieval) {
+            userMessage.attachments[attachmentIndex].tools.push({
+              type: ToolCallTypes.FILE_SEARCH,
+            });
+          }
+
+          attachmentIndex++;
+        }
       }
     };
 
     const initializeThread = async () => {
-      /** @type {[ undefined | MongoFile[]]}*/
-      const processedFiles = await getRequestFileIds();
+      await getRequestFileIds();
+
       // TODO: may allow multiple messages to be created beforehand in a future update
       const initThreadBody = {
         messages: [userMessage],
@@ -360,20 +396,6 @@ const chatV2 = async (req, res) => {
           conversationId,
         },
       };
-
-      if (processedFiles) {
-        for (const file of processedFiles) {
-          if (file.source !== FileSources.openai) {
-            attachedFileIds.delete(file.file_id);
-            const index = file_ids.indexOf(file.file_id);
-            if (index > -1) {
-              file_ids.splice(index, 1);
-            }
-          }
-        }
-
-        userMessage.file_ids = file_ids;
-      }
 
       const result = await initThread({ openai, body: initThreadBody, thread_id });
       thread_id = result.thread_id;
