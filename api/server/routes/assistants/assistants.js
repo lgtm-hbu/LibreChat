@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
   try {
     const openai = await getOpenAIClient({ req, res });
 
-    const { tools = [], endpoint: _endpoint, ...assistantData } = req.body;
+    const { tools = [], endpoint: _e, ...assistantData } = req.body;
     assistantData.tools = tools
       .map((tool) => {
         if (typeof tool !== 'string') {
@@ -73,6 +73,7 @@ router.post('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
+    /* NOTE: not actually being used right now */
     const openai = await getOpenAIClient({ req, res });
 
     const assistant_id = req.params.id;
@@ -96,7 +97,7 @@ router.patch('/:id', async (req, res) => {
     const openai = await getOpenAIClient({ req, res });
 
     const assistant_id = req.params.id;
-    const updateData = req.body;
+    const { endpoint: _e, ...updateData } = req.body;
     updateData.tools = (updateData.tools ?? [])
       .map((tool) => {
         if (typeof tool !== 'string') {
