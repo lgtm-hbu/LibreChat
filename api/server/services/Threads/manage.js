@@ -499,44 +499,62 @@ const recordUsage = async ({
 };
 
 /**
- * Safely replaces the annotated text within the specified range denoted by start_index and end_index,
- * after verifying that the text within that range matches the given annotation text.
- * Proceeds with the replacement even if a mismatch is found, but logs a warning.
+ * Creates a replaceAnnotation function with internal state for tracking the index offset.
  *
- * @param {object} params The original text content.
- * @param {string} params.originalText The original text content.
- * @param {string} params.currentText The current text content, with/without replacements.
- * @param {number} params.start_index The starting index where replacement should begin.
- * @param {number} params.end_index The ending index where replacement should end.
- * @param {string} params.expectedText The text expected to be found in the specified range.
- * @param {string} params.replacementText The text to insert in place of the existing content.
- * @returns {string} The text with the replacement applied, regardless of text match.
+ * @returns {function} The replaceAnnotation function with closure for index offset.
  */
-function replaceAnnotation({
-  originalText,
-  currentText,
-  start_index,
-  end_index,
-  expectedText,
-  replacementText,
-}) {
-  if (start_index < 0 || end_index > originalText.length || start_index > end_index) {
-    logger.warn(`Invalid range specified for annotation replacement.
-    Attempting replacement with \`replace\` method instead...
-    length: ${originalText.length}
-    start_index: ${start_index}
-    end_index: ${end_index}`);
-    return currentText.replace(expectedText, replacementText);
+function createReplaceAnnotation() {
+  let indexOffset = 0;
+
+  /**
+   * Safely replaces the annotated text within the specified range denoted by start_index and end_index,
+   * after verifying that the text within that range matches the given annotation text.
+   * Proceeds with the replacement even if a mismatch is found, but logs a warning.
+   *
+   * @param {object} params The original text content.
+   * @param {string} params.currentText The current text content, with/without replacements.
+   * @param {number} params.start_index The starting index where replacement should begin.
+   * @param {number} params.end_index The ending index where replacement should end.
+   * @param {string} params.expectedText The text expected to be found in the specified range.
+   * @param {string} params.replacementText The text to insert in place of the existing content.
+   * @returns {string} The text with the replacement applied, regardless of text match.
+   */
+  function replaceAnnotation({
+    currentText,
+    start_index,
+    end_index,
+    expectedText,
+    replacementText,
+  }) {
+    const adjustedStartIndex = start_index + indexOffset;
+    const adjustedEndIndex = end_index + indexOffset;
+
+    if (
+      adjustedStartIndex < 0 ||
+      adjustedEndIndex > currentText.length ||
+      adjustedStartIndex > adjustedEndIndex
+    ) {
+      logger.warn(`Invalid range specified for annotation replacement.
+      Attempting replacement with \`replace\` method instead...
+      length: ${currentText.length}
+      start_index: ${adjustedStartIndex}
+      end_index: ${adjustedEndIndex}`);
+      return currentText.replace(expectedText, replacementText);
+    }
+
+    if (currentText.substring(adjustedStartIndex, adjustedEndIndex) !== expectedText) {
+      return currentText.replace(expectedText, replacementText);
+    }
+
+    indexOffset += replacementText.length - (adjustedEndIndex - adjustedStartIndex);
+    return (
+      currentText.slice(0, adjustedStartIndex) +
+      replacementText +
+      currentText.slice(adjustedEndIndex)
+    );
   }
 
-  const actualTextInRange = currentText.substring(start_index, end_index);
-  if (actualTextInRange !== expectedText) {
-    return currentText.replace(expectedText, replacementText);
-  }
-
-  const beforeText = originalText.substring(0, start_index);
-  const afterText = originalText.substring(end_index);
-  return beforeText + replacementText + afterText;
+  return replaceAnnotation;
 }
 
 /**
@@ -587,6 +605,8 @@ async function processMessages({ openai, client, messages = [] }) {
 
       const originalText = currentText;
       text += originalText;
+
+      const replaceAnnotation = createReplaceAnnotation();
 
       logger.debug('[processMessages] Processing annotations:', annotations);
       for (const annotation of annotations) {
