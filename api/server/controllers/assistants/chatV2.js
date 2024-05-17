@@ -194,6 +194,7 @@ const chatV2 = async (req, res) => {
       const runMessages = await checkMessageGaps({
         openai,
         run_id,
+        endpoint,
         thread_id,
         conversationId,
         latestMessageId: responseMessageId,

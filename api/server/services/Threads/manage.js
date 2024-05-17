@@ -206,20 +206,22 @@ async function addThreadMetadata({ openai, thread_id, messageId, messages }) {
  *
  * @param {Object} params - The parameters for synchronizing messages.
  * @param {OpenAIClient} params.openai - The OpenAI client instance.
+ * @param {string} params.endpoint - The current endpoint.
+ * @param {string} params.thread_id - The current thread ID.
  * @param {TMessage[]} params.dbMessages - The LibreChat DB messages.
  * @param {ThreadMessage[]} params.apiMessages - The thread messages from the API.
- * @param {string} params.conversationId - The current conversation ID.
- * @param {string} params.thread_id - The current thread ID.
  * @param {string} [params.assistant_id] - The current assistant ID.
+ * @param {string} params.conversationId - The current conversation ID.
  * @return {Promise<TMessage[]>} A promise that resolves to the updated messages
  */
 async function syncMessages({
   openai,
-  apiMessages,
-  dbMessages,
-  conversationId,
+  endpoint,
   thread_id,
+  dbMessages,
+  apiMessages,
   assistant_id,
+  conversationId,
 }) {
   let result = [];
   let dbMessageMap = new Map(dbMessages.map((msg) => [msg.messageId, msg]));
@@ -291,7 +293,7 @@ async function syncMessages({
         thread_id,
         conversationId,
         messageId: v4(),
-        endpoint: dbMessage.endpoint,
+        endpoint,
         parentMessageId: lastMessage ? lastMessage.messageId : Constants.NO_PARENT,
         role: apiMessage.role,
         isCreatedByUser: apiMessage.role === 'user',
@@ -383,13 +385,21 @@ function mapMessagesToSteps(steps, messages) {
  *
  * @param {Object} params - The parameters for initializing a thread.
  * @param {OpenAIClient} params.openai - The OpenAI client instance.
+ * @param {string} params.endpoint - The current endpoint.
  * @param {string} [params.latestMessageId] - Optional: The latest message ID from LibreChat.
  * @param {string} params.thread_id - Response thread ID.
  * @param {string} params.run_id - Response Run ID.
  * @param {string} params.conversationId - LibreChat conversation ID.
  * @return {Promise<TMessage[]>} A promise that resolves to the updated messages
  */
-async function checkMessageGaps({ openai, latestMessageId, thread_id, run_id, conversationId }) {
+async function checkMessageGaps({
+  openai,
+  endpoint,
+  latestMessageId,
+  thread_id,
+  run_id,
+  conversationId,
+}) {
   const promises = [];
   promises.push(openai.beta.threads.messages.list(thread_id, defaultOrderQuery));
   promises.push(openai.beta.threads.runs.steps.list(thread_id, run_id));
@@ -407,6 +417,7 @@ async function checkMessageGaps({ openai, latestMessageId, thread_id, run_id, co
     role: 'assistant',
     run_id,
     thread_id,
+    endpoint,
     metadata: {
       messageId: latestMessageId,
     },
@@ -453,11 +464,12 @@ async function checkMessageGaps({ openai, latestMessageId, thread_id, run_id, co
 
   const syncedMessages = await syncMessages({
     openai,
+    endpoint,
+    thread_id,
     dbMessages,
     apiMessages,
-    thread_id,
-    conversationId,
     assistant_id,
+    conversationId,
   });
 
   return Object.values(
