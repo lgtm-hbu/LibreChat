@@ -31,7 +31,6 @@ const getCurrentVersion = async (req, endpoint) => {
   if (!version?.startsWith('v') && version.length !== 2) {
     throw new Error(`[${req.baseUrl}] Invalid version: ${version}`);
   }
-  console.debug(`[${req.baseUrl}] Current version: ${version}`);
   return version;
 };
 
