@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, FormProvider, Controller, useWatch } from 'react-hook-form';
 import { useGetModelsQuery } from 'librechat-data-provider/react-query';
@@ -13,10 +13,11 @@ import {
 import type { FunctionTool, TConfig, TPlugin } from 'librechat-data-provider';
 import type { AssistantForm, AssistantPanelProps } from '~/common';
 import { useCreateAssistantMutation, useUpdateAssistantMutation } from '~/data-provider';
-import { SelectDropDown, Checkbox, QuestionMark } from '~/components/ui';
 import { useAssistantsMapContext, useToastContext } from '~/Providers';
 import { useSelectAssistant, useLocalize } from '~/hooks';
 import { ToolSelectDialog } from '~/components/Tools';
+import CapabilitiesForm from './CapabilitiesForm';
+import { SelectDropDown } from '~/components/ui';
 import AssistantAvatar from './AssistantAvatar';
 import AssistantSelect from './AssistantSelect';
 import AssistantAction from './AssistantAction';
@@ -57,20 +58,15 @@ export default function AssistantPanel({
 
   const [showToolDialog, setShowToolDialog] = useState(false);
 
-  const { control, handleSubmit, reset, setValue, getValues } = methods;
+  const { control, handleSubmit, reset } = methods;
   const assistant = useWatch({ control, name: 'assistant' });
   const functions = useWatch({ control, name: 'functions' });
   const assistant_id = useWatch({ control, name: 'id' });
-  const model = useWatch({ control, name: 'model' });
 
   const activeModel = useMemo(() => {
     return assistantMap?.[endpoint]?.[assistant_id]?.model;
   }, [assistantMap, endpoint, assistant_id]);
 
-  const retrievalModels = useMemo(
-    () => new Set(assistantsConfig?.retrievalModels ?? []),
-    [assistantsConfig],
-  );
   const toolsEnabled = useMemo(
     () => assistantsConfig?.capabilities?.includes(Capabilities.tools),
     [assistantsConfig],
@@ -87,16 +83,6 @@ export default function AssistantPanel({
     () => assistantsConfig?.capabilities?.includes(Capabilities.code_interpreter),
     [assistantsConfig],
   );
-  const imageVisionEnabled = useMemo(
-    () => assistantsConfig?.capabilities?.includes(Capabilities.image_vision),
-    [assistantsConfig],
-  );
-
-  useEffect(() => {
-    if (model && !retrievalModels.has(model)) {
-      setValue(Capabilities.retrieval, false);
-    }
-  }, [model, setValue, retrievalModels]);
 
   /* Mutations */
   const update = useUpdateAssistantMutation({
@@ -353,120 +339,16 @@ export default function AssistantPanel({
             />
           </div>
           {/* Knowledge */}
-          {(codeEnabled || retrievalEnabled) && (
+          {(codeEnabled || retrievalEnabled) && version == 1 && (
             <Knowledge assistant_id={assistant_id} files={files} endpoint={endpoint} />
           )}
           {/* Capabilities */}
-          <div className="mb-6">
-            <div className="mb-1.5 flex items-center">
-              <span>
-                <label className="text-token-text-primary block font-medium">
-                  {localize('com_assistants_capabilities')}
-                </label>
-              </span>
-            </div>
-            <div className="flex flex-col items-start gap-2">
-              {codeEnabled && (
-                <div className="flex items-center">
-                  <Controller
-                    name={Capabilities.code_interpreter}
-                    control={control}
-                    render={({ field }) => (
-                      <Checkbox
-                        {...field}
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="relative float-left  mr-2 inline-flex h-4 w-4 cursor-pointer"
-                        value={field?.value?.toString()}
-                      />
-                    )}
-                  />
-                  <label
-                    className="form-check-label text-token-text-primary w-full cursor-pointer"
-                    htmlFor={Capabilities.code_interpreter}
-                    onClick={() =>
-                      setValue(
-                        Capabilities.code_interpreter,
-                        !getValues(Capabilities.code_interpreter),
-                        {
-                          shouldDirty: true,
-                        },
-                      )
-                    }
-                  >
-                    <div className="flex items-center">
-                      {localize('com_assistants_code_interpreter')}
-                      <QuestionMark />
-                    </div>
-                  </label>
-                </div>
-              )}
-              {imageVisionEnabled && (
-                <div className="flex items-center">
-                  <Controller
-                    name={Capabilities.image_vision}
-                    control={control}
-                    render={({ field }) => (
-                      <Checkbox
-                        {...field}
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="relative float-left  mr-2 inline-flex h-4 w-4 cursor-pointer"
-                        value={field?.value?.toString()}
-                      />
-                    )}
-                  />
-                  <label
-                    className="form-check-label text-token-text-primary w-full cursor-pointer"
-                    htmlFor={Capabilities.image_vision}
-                    onClick={() =>
-                      setValue(Capabilities.image_vision, !getValues(Capabilities.image_vision), {
-                        shouldDirty: true,
-                      })
-                    }
-                  >
-                    <div className="flex items-center">
-                      {localize('com_assistants_image_vision')}
-                      <QuestionMark />
-                    </div>
-                  </label>
-                </div>
-              )}
-              {retrievalEnabled && (
-                <div className="flex items-center">
-                  <Controller
-                    name={Capabilities.retrieval}
-                    control={control}
-                    render={({ field }) => (
-                      <Checkbox
-                        {...field}
-                        checked={field.value}
-                        disabled={!retrievalModels.has(model)}
-                        onCheckedChange={field.onChange}
-                        className="relative float-left  mr-2 inline-flex h-4 w-4 cursor-pointer"
-                        value={field?.value?.toString()}
-                      />
-                    )}
-                  />
-                  <label
-                    className={cn(
-                      'form-check-label text-token-text-primary w-full',
-                      !retrievalModels.has(model) ? 'cursor-no-drop opacity-50' : 'cursor-pointer',
-                    )}
-                    htmlFor={Capabilities.retrieval}
-                    onClick={() =>
-                      retrievalModels.has(model) &&
-                      setValue(Capabilities.retrieval, !getValues(Capabilities.retrieval), {
-                        shouldDirty: true,
-                      })
-                    }
-                  >
-                    {localize('com_assistants_retrieval')}
-                  </label>
-                </div>
-              )}
-            </div>
-          </div>
+          <CapabilitiesForm
+            version={version}
+            codeEnabled={codeEnabled}
+            assistantsConfig={assistantsConfig}
+            retrievalEnabled={retrievalEnabled}
+          />
           {/* Tools */}
           <div className="mb-6">
             <label className={labelClass}>
