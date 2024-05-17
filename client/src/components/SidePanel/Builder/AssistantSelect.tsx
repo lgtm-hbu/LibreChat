@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
 import {
+  Tools,
   FileSources,
   Capabilities,
   LocalStorageKeys,
@@ -138,6 +139,9 @@ export default function AssistantSelect({
         ?.filter((tool) => tool.type !== 'function' || isImageVisionTool(tool))
         ?.map((tool) => tool?.function?.name || tool.type)
         .forEach((tool) => {
+          if (tool === Tools.file_search) {
+            actions[Capabilities.retrieval] = true;
+          }
           actions[tool] = true;
         });
 
