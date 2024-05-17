@@ -16,6 +16,7 @@ const {
 const { convertImage, resizeAndConvert } = require('~/server/services/Files/images');
 const { getOpenAIClient } = require('~/server/controllers/assistants/helpers');
 const { createFile, updateFileUsage, deleteFiles } = require('~/models/File');
+const { addResourceFileId } = require('~/server/controllers/assistants/v2');
 const { LB_QueueAsyncCall } = require('~/server/utils/queue');
 const { getStrategyFunctions } = require('./strategies');
 const { determineFileType } = require('~/server/utils');
@@ -311,9 +312,17 @@ const processFileUpload = async ({ req, res, file, metadata }) => {
     openai,
   });
 
-  if (isAssistantUpload && !metadata.message_file) {
+  if (isAssistantUpload && !metadata.message_file && !metadata.tool_resource) {
     await openai.beta.assistants.files.create(metadata.assistant_id, {
       file_id: id,
+    });
+  } else if (isAssistantUpload && !metadata.message_file) {
+    await addResourceFileId({
+      req,
+      openai,
+      file_id: id,
+      assistant_id: metadata.assistant_id,
+      tool_resource: metadata.tool_resource,
     });
   }
 

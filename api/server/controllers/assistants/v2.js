@@ -44,6 +44,115 @@ const createAssistant = async (req, res) => {
 
 /**
  * Modifies an assistant.
+ * @param {object} params
+ * @param {Express.Request} params.req
+ * @param {OpenAIClient} params.openai
+ * @param {string} params.assistant_id
+ * @param {AssistantUpdateParams} params.updateData
+ * @returns {Promise<Assistant>} The updated assistant.
+ */
+const updateAssistant = async ({ req, openai, assistant_id, updateData }) => {
+  const tools = [];
+
+  for (const tool of updateData.tools ?? []) {
+    let actualTool = typeof tool === 'string' ? req.app.locals.availableTools[tool] : tool;
+
+    if (!actualTool) {
+      continue;
+    }
+
+    if (!actualTool.function) {
+      tools.push(actualTool);
+      continue;
+    }
+
+    const updatedTool = await validateAndUpdateTool({ req, tool: actualTool, assistant_id });
+    if (updatedTool) {
+      tools.push(updatedTool);
+    }
+  }
+
+  updateData.tools = tools;
+
+  if (openai.locals?.azureOptions && updateData.model) {
+    updateData.model = openai.locals.azureOptions.azureOpenAIApiDeploymentName;
+  }
+
+  return await openai.beta.assistants.update(assistant_id, updateData);
+};
+
+/**
+ * Modifies an assistant with the resource file id.
+ * @param {object} params
+ * @param {Express.Request} params.req
+ * @param {OpenAIClient} params.openai
+ * @param {string} params.assistant_id
+ * @param {string} params.tool_resource
+ * @param {string} params.file_id
+ * @param {AssistantUpdateParams} params.updateData
+ * @returns {Promise<Assistant>} The updated assistant.
+ */
+const addResourceFileId = async ({ req, openai, assistant_id, tool_resource, file_id }) => {
+  const assistant = await openai.beta.assistants.retrieve(assistant_id);
+  const { tool_resources = {} } = assistant;
+  if (tool_resources[tool_resource]) {
+    tool_resources[tool_resource].file_ids.push(file_id);
+  } else {
+    tool_resources[tool_resource] = { file_ids: [file_id] };
+  }
+
+  delete assistant.id;
+  return await updateAssistant({
+    req,
+    openai,
+    assistant_id,
+    updateData: { tools: assistant.tools, tool_resources },
+  });
+};
+
+/**
+ * Deletes a file ID from an assistant's resource.
+ * @param {object} params
+ * @param {Express.Request} params.req
+ * @param {OpenAIClient} params.openai
+ * @param {string} params.assistant_id
+ * @param {string} [params.tool_resource]
+ * @param {string} params.file_id
+ * @param {AssistantUpdateParams} params.updateData
+ * @returns {Promise<Assistant>} The updated assistant.
+ */
+const deleteResourceFileId = async ({ req, openai, assistant_id, tool_resource, file_id }) => {
+  const assistant = await openai.beta.assistants.retrieve(assistant_id);
+  const { tool_resources = {} } = assistant;
+
+  if (tool_resource && tool_resources[tool_resource]) {
+    const resource = tool_resources[tool_resource];
+    const index = resource.file_ids.indexOf(file_id);
+    if (index !== -1) {
+      resource.file_ids.splice(index, 1);
+    }
+  } else {
+    for (const resourceKey in tool_resources) {
+      const resource = tool_resources[resourceKey];
+      const index = resource.file_ids.indexOf(file_id);
+      if (index !== -1) {
+        resource.file_ids.splice(index, 1);
+        break;
+      }
+    }
+  }
+
+  delete assistant.id;
+  return await updateAssistant({
+    req,
+    openai,
+    assistant_id,
+    updateData: { tools: assistant.tools, tool_resources },
+  });
+};
+
+/**
+ * Modifies an assistant.
  * @route PATCH /assistants/:id
  * @param {object} req - Express Request
  * @param {object} req.params - Request params
@@ -54,38 +163,10 @@ const createAssistant = async (req, res) => {
 const patchAssistant = async (req, res) => {
   try {
     const { openai } = await getOpenAIClient({ req, res });
-
     const assistant_id = req.params.id;
     const { endpoint: _e, ...updateData } = req.body;
     updateData.tools = updateData.tools ?? [];
-
-    const tools = [];
-
-    for (const tool of updateData.tools ?? []) {
-      let actualTool = typeof tool === 'string' ? req.app.locals.availableTools[tool] : tool;
-
-      if (!actualTool) {
-        continue;
-      }
-
-      if (!actualTool.function) {
-        tools.push(actualTool);
-        continue;
-      }
-
-      const updatedTool = await validateAndUpdateTool({ req, tool: actualTool, assistant_id });
-      if (updatedTool) {
-        tools.push(updatedTool);
-      }
-    }
-
-    updateData.tools = tools;
-
-    if (openai.locals?.azureOptions && updateData.model) {
-      updateData.model = openai.locals.azureOptions.azureOpenAIApiDeploymentName;
-    }
-
-    const updatedAssistant = await openai.beta.assistants.update(assistant_id, updateData);
+    const updatedAssistant = await updateAssistant({ req, openai, assistant_id, updateData });
     res.json(updatedAssistant);
   } catch (error) {
     logger.error('[/assistants/:id] Error updating assistant', error);
@@ -96,4 +177,7 @@ const patchAssistant = async (req, res) => {
 module.exports = {
   patchAssistant,
   createAssistant,
+  updateAssistant,
+  addResourceFileId,
+  deleteResourceFileId,
 };

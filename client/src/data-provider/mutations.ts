@@ -1,4 +1,4 @@
-import { LocalStorageKeys, defaultAssistantsVersion } from 'librechat-data-provider';
+import { Capabilities, LocalStorageKeys, defaultAssistantsVersion } from 'librechat-data-provider';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult } from '@tanstack/react-query';
 import type t from 'librechat-data-provider';
@@ -303,6 +303,7 @@ export const useUploadFileMutation = (
       const endpoint = formData.get('endpoint');
       const assistant_id = formData.get('assistant_id');
       const message_file = formData.get('message_file');
+      const tool_resource = formData.get('tool_resource');
 
       if (!assistant_id || message_file === 'true') {
         onSuccess?.(data, formData, context);
@@ -319,13 +320,29 @@ export const useUploadFileMutation = (
           return {
             ...prev,
             data: prev?.data.map((assistant) => {
-              if (assistant.id === assistant_id) {
-                return {
-                  ...assistant,
-                  file_ids: [...assistant.file_ids, data.file_id],
+              if (assistant.id !== assistant_id) {
+                return assistant;
+              }
+
+              const update = {};
+              if (!tool_resource) {
+                update['file_ids'] = [...assistant.file_ids, data.file_id];
+              }
+              if (tool_resource === Capabilities.code_interpreter) {
+                const prevResources = assistant.tool_resources ?? {};
+                const prevResource = assistant.tool_resources?.[tool_resource as string] ?? {
+                  file_ids: [],
+                };
+                prevResource.file_ids.push(data.file_id);
+                update['tool_resources'] = {
+                  ...prevResources,
+                  [tool_resource as string]: prevResource,
                 };
               }
-              return assistant;
+              return {
+                ...assistant,
+                ...update,
+              };
             }),
           };
         },

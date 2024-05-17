@@ -1,9 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import {
-  mergeFileConfig,
-  codeInterpreterMimeTypes,
-  fileConfig as defaultFileConfig,
-} from 'librechat-data-provider';
+import { mergeFileConfig, fileConfig as defaultFileConfig } from 'librechat-data-provider';
 import type { AssistantsEndpoint } from 'librechat-data-provider';
 import type { ExtendedFile } from '~/common';
 import FileRow from '~/components/Chat/Input/Files/FileRow';
@@ -68,9 +64,6 @@ export default function Knowledge({
           setFiles={setFiles}
           setFilesLoading={setFilesLoading}
           assistant_id={assistant_id}
-          fileFilter={(file: ExtendedFile) =>
-            !codeInterpreterMimeTypes.some((regex) => regex.test(file.type ?? ''))
-          }
           Wrapper={({ children }) => <div className="flex flex-wrap gap-2">{children}</div>}
         />
         <div>
