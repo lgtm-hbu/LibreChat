@@ -85,10 +85,10 @@ export default function AssistantSelect({
               {
                 file_id,
                 type: '',
-                filepath: '',
                 filename: '',
                 size: 1,
                 progress: 1,
+                filepath: endpoint,
                 source: FileSources.openai,
               },
             ]);
