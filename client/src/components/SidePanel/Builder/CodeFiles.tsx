@@ -69,7 +69,7 @@ export default function Knowledge({
           setFilesLoading={setFilesLoading}
           assistant_id={assistant_id}
           fileFilter={(file: ExtendedFile) =>
-            codeInterpreterMimeTypes.some((regex) => regex.test(file.type ?? ''))
+            !codeInterpreterMimeTypes.some((regex) => regex.test(file.type ?? ''))
           }
           Wrapper={({ children }) => <div className="flex flex-wrap gap-2">{children}</div>}
         />

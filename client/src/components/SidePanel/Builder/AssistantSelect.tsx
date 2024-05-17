@@ -61,10 +61,10 @@ export default function AssistantSelect({
             : undefined,
         };
 
-        const handleFile = (file_id: string) => {
+        const handleFile = (file_id: string, list?: Array<[string, ExtendedFile]>) => {
           const file = fileMap?.[file_id];
           if (file) {
-            assistant.files?.push([
+            list?.push([
               file_id,
               {
                 file_id: file.file_id,
@@ -80,15 +80,14 @@ export default function AssistantSelect({
               },
             ]);
           } else {
-            assistant.code_files?.push([
+            list?.push([
               file_id,
               {
                 file_id,
                 type: '',
                 filepath: '',
                 filename: '',
-                size: 0,
-                preview: '',
+                size: 1,
                 progress: 1,
                 source: FileSources.openai,
               },
@@ -97,11 +96,13 @@ export default function AssistantSelect({
         };
 
         if (assistant.files && _assistant.file_ids) {
-          _assistant.file_ids.forEach(handleFile);
+          _assistant.file_ids.forEach((file_id) => handleFile(file_id, assistant.files));
         }
 
         if (assistant.code_files && _assistant.tool_resources?.code_interpreter?.file_ids) {
-          _assistant.tool_resources?.code_interpreter?.file_ids?.forEach(handleFile);
+          _assistant.tool_resources?.code_interpreter?.file_ids?.forEach((file_id) =>
+            handleFile(file_id, assistant.code_files),
+          );
         }
 
         return assistant;
