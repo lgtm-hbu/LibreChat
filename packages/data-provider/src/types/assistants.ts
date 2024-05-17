@@ -11,6 +11,7 @@ export type Metadata = {
 
 export enum Tools {
   code_interpreter = 'code_interpreter',
+  file_search = 'file_search',
   retrieval = 'retrieval',
   function = 'function',
 }
@@ -131,11 +132,21 @@ export type RetrievalToolCall = {
 };
 
 /**
+ * Details of a Retrieval tool call the run step was involved in.
+ * Includes the tool call ID and the type of tool call.
+ */
+export type FileSearchToolCall = {
+  id: string; // The ID of the tool call object.
+  file_search: unknown; // An empty object for now.
+  type: 'file_search'; // The type of tool call, always 'retrieval'.
+};
+
+/**
  * Details of the tool calls involved in a run step.
  * Can be associated with one of three types of tools: `code_interpreter`, `retrieval`, or `function`.
  */
 export type ToolCallsStepDetails = {
-  tool_calls: Array<CodeToolCall | RetrievalToolCall | FunctionToolCall>; // An array of tool calls the run step was involved in.
+  tool_calls: Array<CodeToolCall | RetrievalToolCall | FileSearchToolCall | FunctionToolCall>; // An array of tool calls the run step was involved in.
   type: 'tool_calls'; // Always 'tool_calls'.
 };
 
@@ -247,7 +258,14 @@ export type PartMetadata = {
   action?: boolean;
 };
 
-export type ContentPart = (CodeToolCall | RetrievalToolCall | FunctionToolCall | ImageFile | Text) &
+export type ContentPart = (
+  | CodeToolCall
+  | RetrievalToolCall
+  | FileSearchToolCall
+  | FunctionToolCall
+  | ImageFile
+  | Text
+) &
   PartMetadata;
 
 export type TMessageContentParts =
@@ -255,7 +273,8 @@ export type TMessageContentParts =
   | { type: ContentTypes.TEXT; text: Text & PartMetadata }
   | {
       type: ContentTypes.TOOL_CALL;
-      tool_call: (CodeToolCall | RetrievalToolCall | FunctionToolCall) & PartMetadata;
+      tool_call: (CodeToolCall | RetrievalToolCall | FileSearchToolCall | FunctionToolCall) &
+        PartMetadata;
     }
   | { type: ContentTypes.IMAGE_FILE; image_file: ImageFile & PartMetadata };
 
