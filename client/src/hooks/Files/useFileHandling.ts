@@ -25,7 +25,8 @@ const { checkType } = defaultFileConfig;
 type UseFileHandling = {
   overrideEndpoint?: EModelEndpoint;
   fileSetter?: FileSetter;
-  additionalMetadata?: Record<string, string>;
+  fileFilter?: (file: File) => boolean;
+  additionalMetadata?: Record<string, string | undefined>;
 };
 
 const useFileHandling = (params?: UseFileHandling) => {
@@ -147,7 +148,9 @@ const useFileHandling = (params?: UseFileHandling) => {
 
     if (params?.additionalMetadata) {
       for (const [key, value] of Object.entries(params.additionalMetadata)) {
-        formData.append(key, value);
+        if (value) {
+          formData.append(key, value);
+        }
       }
     }
 

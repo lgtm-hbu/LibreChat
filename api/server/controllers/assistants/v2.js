@@ -10,6 +10,7 @@ const { logger } = require('~/config');
  */
 const createAssistant = async (req, res) => {
   try {
+    /** @type {{ openai: OpenAIClient }} */
     const { openai } = await getOpenAIClient({ req, res });
 
     const { tools = [], endpoint: _e, ...assistantData } = req.body;

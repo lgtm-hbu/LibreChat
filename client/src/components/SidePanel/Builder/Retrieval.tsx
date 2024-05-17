@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useFormContext, Controller, useWatch } from 'react-hook-form';
 import { Capabilities } from 'librechat-data-provider';
+import type { AssistantsEndpoint } from 'librechat-data-provider';
 import type { AssistantForm } from '~/common';
 import { Checkbox } from '~/components/ui';
 import { useLocalize } from '~/hooks';
@@ -12,11 +13,20 @@ export default function Retrieval({
 }: {
   version: number | string;
   retrievalModels: Set<string>;
+  endpoint: AssistantsEndpoint;
 }) {
   const localize = useLocalize();
   const methods = useFormContext<AssistantForm>();
   const { control, setValue, getValues } = methods;
   const model = useWatch({ control, name: 'model' });
+  const assistant = useWatch({ control, name: 'assistant' });
+
+  const files = useMemo(() => {
+    if (typeof assistant === 'string') {
+      return [];
+    }
+    return assistant.tool_resources?.file_search;
+  }, [assistant]);
 
   useEffect(() => {
     if (model && !retrievalModels.has(model)) {

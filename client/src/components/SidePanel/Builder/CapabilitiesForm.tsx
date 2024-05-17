@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Capabilities } from 'librechat-data-provider';
-import type { TConfig } from 'librechat-data-provider';
+import type { TConfig, AssistantsEndpoint } from 'librechat-data-provider';
 import ImageVision from './ImageVision';
 import { useLocalize } from '~/hooks';
 import Retrieval from './Retrieval';
@@ -8,6 +8,7 @@ import Code from './Code';
 
 export default function CapabilitiesForm({
   version,
+  endpoint,
   codeEnabled,
   retrievalEnabled,
   assistantsConfig,
@@ -15,6 +16,7 @@ export default function CapabilitiesForm({
   version: number | string;
   codeEnabled?: boolean;
   retrievalEnabled?: boolean;
+  endpoint: AssistantsEndpoint;
   assistantsConfig?: TConfig | null;
 }) {
   const localize = useLocalize();
@@ -38,9 +40,11 @@ export default function CapabilitiesForm({
         </span>
       </div>
       <div className="flex flex-col items-start gap-2">
-        {codeEnabled && <Code version={version} />}
+        {codeEnabled && <Code endpoint={endpoint} version={version} />}
         {imageVisionEnabled && version == 1 && <ImageVision />}
-        {retrievalEnabled && <Retrieval version={version} retrievalModels={retrievalModels} />}
+        {retrievalEnabled && (
+          <Retrieval endpoint={endpoint} version={version} retrievalModels={retrievalModels} />
+        )}
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 import { Plus } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
 import {
-  defaultAssistantFormValues,
-  isImageVisionTool,
-  Capabilities,
   FileSources,
+  Capabilities,
+  LocalStorageKeys,
+  isImageVisionTool,
+  defaultAssistantFormValues,
 } from 'librechat-data-provider';
 import type { UseFormReset } from 'react-hook-form';
 import type { UseMutationResult } from '@tanstack/react-query';
@@ -43,7 +44,7 @@ export default function AssistantSelect({
   const fileMap = useFileMapContext();
   const lastSelectedAssistant = useRef<string | null>(null);
   const [lastSelectedModels] = useLocalStorage<LastSelectedModels>(
-    'lastSelectedModel',
+    LocalStorageKeys.LAST_MODEL,
     {} as LastSelectedModels,
   );
 
@@ -55,30 +56,54 @@ export default function AssistantSelect({
           label: _assistant?.name ?? '',
           value: _assistant.id,
           files: _assistant?.file_ids ? ([] as Array<[string, ExtendedFile]>) : undefined,
+          code_files: _assistant?.tool_resources?.code_interpreter?.file_ids
+            ? ([] as Array<[string, ExtendedFile]>)
+            : undefined,
+        };
+
+        const handleFile = (file_id: string) => {
+          const file = fileMap?.[file_id];
+          if (file) {
+            assistant.files?.push([
+              file_id,
+              {
+                file_id: file.file_id,
+                type: file.type,
+                filepath: file.filepath,
+                filename: file.filename,
+                width: file.width,
+                height: file.height,
+                size: file.bytes,
+                preview: file.filepath,
+                progress: 1,
+                source: FileSources.openai,
+              },
+            ]);
+          } else {
+            assistant.code_files?.push([
+              file_id,
+              {
+                file_id,
+                type: '',
+                filepath: '',
+                filename: '',
+                size: 0,
+                preview: '',
+                progress: 1,
+                source: FileSources.openai,
+              },
+            ]);
+          }
         };
 
         if (assistant.files && _assistant.file_ids) {
-          _assistant.file_ids.forEach((file_id) => {
-            const file = fileMap?.[file_id];
-            if (file) {
-              assistant.files?.push([
-                file_id,
-                {
-                  file_id: file.file_id,
-                  type: file.type,
-                  filepath: file.filepath,
-                  filename: file.filename,
-                  width: file.width,
-                  height: file.height,
-                  size: file.bytes,
-                  preview: file.filepath,
-                  progress: 1,
-                  source: FileSources.openai,
-                },
-              ]);
-            }
-          });
+          _assistant.file_ids.forEach(handleFile);
         }
+
+        if (assistant.code_files && _assistant.tool_resources?.code_interpreter?.file_ids) {
+          _assistant.tool_resources?.code_interpreter?.file_ids?.forEach(handleFile);
+        }
+
         return assistant;
       }),
   });

@@ -345,6 +345,7 @@ export default function AssistantPanel({
           {/* Capabilities */}
           <CapabilitiesForm
             version={version}
+            endpoint={endpoint}
             codeEnabled={codeEnabled}
             assistantsConfig={assistantsConfig}
             retrievalEnabled={retrievalEnabled}

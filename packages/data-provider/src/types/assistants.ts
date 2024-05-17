@@ -29,6 +29,35 @@ export type FunctionTool = {
   };
 };
 
+/**
+ * A set of resources that are used by the assistant's tools. The resources are
+ * specific to the type of tool. For example, the `code_interpreter` tool requires
+ * a list of file IDs, while the `file_search` tool requires a list of vector store
+ * IDs.
+ */
+export interface ToolResources {
+  code_interpreter?: CodeInterpreterResource;
+  file_search?: FileSearchResource;
+}
+export interface CodeInterpreterResource {
+  /**
+   * A list of [file](https://platform.openai.com/docs/api-reference/files) IDs made
+   * available to the `code_interpreter`` tool. There can be a maximum of 20 files
+   * associated with the tool.
+   */
+  file_ids?: Array<string>;
+}
+
+export interface FileSearchResource {
+  /**
+   * The ID of the
+   * [vector store](https://platform.openai.com/docs/api-reference/vector-stores/object)
+   * attached to this assistant. There can be a maximum of 1 vector store attached to
+   * the assistant.
+   */
+  vector_store_ids?: Array<string>;
+}
+
 export type Assistant = {
   id: string;
   created_at: number;
@@ -40,6 +69,7 @@ export type Assistant = {
   name: string | null;
   object: string;
   tools: FunctionTool[];
+  tool_resources?: ToolResources;
 };
 
 export type TAssistantsMap = Record<AssistantsEndpoint, Record<string, Assistant>>;
