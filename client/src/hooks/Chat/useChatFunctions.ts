@@ -222,7 +222,9 @@ export default function useChatFunctions({
     } else {
       setMessages([...submission.messages, currentMsg, initialResponse]);
     }
-    setLatestMessage(initialResponse);
+    if (index === 0) {
+      setLatestMessage(initialResponse);
+    }
     setSubmission(submission);
   };
 
