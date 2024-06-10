@@ -79,6 +79,7 @@ export default function useChatHelpers(index = 0, paramId: string | undefined) {
     isSubmitting,
     conversation,
     latestMessage,
+    setLatestMessage,
   });
 
   const continueGeneration = () => {

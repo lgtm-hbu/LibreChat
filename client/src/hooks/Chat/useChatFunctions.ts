@@ -25,13 +25,14 @@ import store from '~/store';
 
 export default function useChatFunctions({
   index = 0,
-  conversation,
-  latestMessage,
+  files,
+  setFiles,
   getMessages,
   setMessages,
   isSubmitting,
-  files,
-  setFiles,
+  conversation,
+  latestMessage,
+  setLatestMessage,
 }: {
   index?: number;
   isSubmitting: boolean;
@@ -42,6 +43,7 @@ export default function useChatFunctions({
   setMessages: (messages: TMessage[]) => void;
   files?: Map<string, ExtendedFile>;
   setFiles?: SetterOrUpdater<Map<string, ExtendedFile>>;
+  setLatestMessage?: SetterOrUpdater<TMessage | null>;
 }) {
   const setShowStopButton = useSetRecoilState(store.showStopButtonByIndex(index));
   const setFilesToDelete = useSetFilesToDelete();
@@ -49,7 +51,6 @@ export default function useChatFunctions({
 
   const queryClient = useQueryClient();
   const { getExpiry } = useUserKey(conversation?.endpoint ?? '');
-  const setLatestMessage = useSetRecoilState(store.latestMessageFamily(index));
   const setSubmission = useSetRecoilState(store.submissionByIndex(index));
 
   const ask: TAskFunction = (
@@ -222,7 +223,7 @@ export default function useChatFunctions({
     } else {
       setMessages([...submission.messages, currentMsg, initialResponse]);
     }
-    if (index === 0) {
+    if (index === 0 && setLatestMessage) {
       setLatestMessage(initialResponse);
     }
     setSubmission(submission);
