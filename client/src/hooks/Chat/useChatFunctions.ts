@@ -32,6 +32,7 @@ export default function useChatFunctions({
   isSubmitting,
   conversation,
   latestMessage,
+  setSubmission,
   setLatestMessage,
 }: {
   index?: number;
@@ -43,6 +44,7 @@ export default function useChatFunctions({
   setMessages: (messages: TMessage[]) => void;
   files?: Map<string, ExtendedFile>;
   setFiles?: SetterOrUpdater<Map<string, ExtendedFile>>;
+  setSubmission: SetterOrUpdater<TSubmission | null>;
   setLatestMessage?: SetterOrUpdater<TMessage | null>;
 }) {
   const setShowStopButton = useSetRecoilState(store.showStopButtonByIndex(index));
@@ -51,7 +53,6 @@ export default function useChatFunctions({
 
   const queryClient = useQueryClient();
   const { getExpiry } = useUserKey(conversation?.endpoint ?? '');
-  const setSubmission = useSetRecoilState(store.submissionByIndex(index));
 
   const ask: TAskFunction = (
     { text, parentMessageId = null, conversationId = null, messageId = null },
