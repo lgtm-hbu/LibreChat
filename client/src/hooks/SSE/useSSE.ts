@@ -31,10 +31,10 @@ import {
   updateConversation,
   getConversationById,
 } from '~/utils';
+import useContentHandler from '~/hooks/SSE/useContentHandler';
+import useChatHelpers from '~/hooks/Chat/useChatHelpers';
 import { useGenTitleMutation } from '~/data-provider';
-import useContentHandler from './useContentHandler';
-import { useAuthContext } from '../AuthContext';
-import useChatHelpers from '../useChatHelpers';
+import { useAuthContext } from '~/hooks/AuthContext';
 import store from '~/store';
 
 type TResData = {
