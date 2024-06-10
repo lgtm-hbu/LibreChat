@@ -11,6 +11,7 @@ import type {
   Assistant,
   TLoginUser,
   AuthTypeEnum,
+  TModelsConfig,
   TConversation,
   TStartupConfig,
   EModelEndpoint,
@@ -404,3 +405,13 @@ export type TLoginLayoutContext = {
   headerText: string;
   setHeaderText: React.Dispatch<React.SetStateAction<string>>;
 };
+
+export type NewConversationParams = {
+  template?: Partial<TConversation>;
+  preset?: Partial<TPreset>;
+  modelsData?: TModelsConfig;
+  buildDefault?: boolean;
+  keepLatestMessage?: boolean;
+};
+
+export type ConvoGenerator = (params: NewConversationParams) => void | TConversation;

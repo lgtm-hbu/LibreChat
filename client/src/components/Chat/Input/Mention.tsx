@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { EModelEndpoint } from 'librechat-data-provider';
 import type { SetterOrUpdater } from 'recoil';
 import type { MentionOption } from '~/common';
+import { useLocalize, useCombobox, useNewConvo } from '~/hooks';
 import useSelectMention from '~/hooks/Input/useSelectMention';
 import { useAssistantsMapContext } from '~/Providers';
 import useMentions from '~/hooks/Input/useMentions';
-import { useLocalize, useCombobox } from '~/hooks';
 import { removeAtSymbolIfLast } from '~/utils';
 import MentionItem from './MentionItem';
 
@@ -17,6 +17,7 @@ export default function Mention({
   textAreaRef: React.MutableRefObject<HTMLTextAreaElement | null>;
 }) {
   const localize = useLocalize();
+  const { newConversation } = useNewConvo();
   const assistantMap = useAssistantsMapContext();
   const { options, presets, modelSpecs, modelsConfig, endpointsConfig, assistantListMap } =
     useMentions({ assistantMap });
@@ -25,6 +26,7 @@ export default function Mention({
     modelSpecs,
     assistantMap,
     endpointsConfig,
+    newConversation,
   });
 
   const [activeIndex, setActiveIndex] = useState(0);
