@@ -8,7 +8,7 @@ import {
   fileConfig as defaultFileConfig,
 } from 'librechat-data-provider';
 import { useChatContext, useAssistantsMapContext } from '~/Providers';
-import { useRequiresKey, useTextarea } from '~/hooks';
+import { useRequiresKey, useTextarea, useHandleKeyUp } from '~/hooks';
 import { TextareaAutosize } from '~/components/ui';
 import { useGetFileConfig } from '~/data-provider';
 import { cn, removeFocusRings } from '~/utils';
@@ -38,12 +38,12 @@ const ChatForm = ({ index = 0 }) => {
     defaultValues: { text: '' },
   });
 
-  const { handlePaste, handleKeyDown, handleKeyUp, handleCompositionStart, handleCompositionEnd } =
-    useTextarea({
-      textAreaRef,
-      submitButtonRef,
-      disabled: !!requiresKey,
-    });
+  const handleKeyUp = useHandleKeyUp({ index, textAreaRef });
+  const { handlePaste, handleKeyDown, handleCompositionStart, handleCompositionEnd } = useTextarea({
+    textAreaRef,
+    submitButtonRef,
+    disabled: !!requiresKey,
+  });
 
   const {
     ask,

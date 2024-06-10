@@ -1,7 +1,7 @@
 import debounce from 'lodash/debounce';
+import { useRecoilValue } from 'recoil';
 import { useEffect, useRef, useCallback } from 'react';
 import { isAssistantsEndpoint } from 'librechat-data-provider';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
 import type { TEndpointOption } from 'librechat-data-provider';
 import type { KeyboardEvent } from 'react';
 import { forceResize, insertTextAtCursor, getAssistantName } from '~/utils';
@@ -32,7 +32,6 @@ export default function useTextarea({
   const enterToSend = useRecoilValue(store.enterToSend);
 
   const {
-    index,
     conversation,
     isSubmitting,
     filesLoading,
@@ -40,8 +39,6 @@ export default function useTextarea({
     setFilesLoading,
     setShowBingToneSetting,
   } = useChatContext();
-
-  const setShowMentionPopover = useSetRecoilState(store.showMentionPopoverFamily(index));
 
   const { conversationId, jailbreak, endpoint = '', assistant_id } = conversation || {};
   const isNotAppendable =
@@ -139,23 +136,6 @@ export default function useTextarea({
     assistantMap,
   ]);
 
-  const handleKeyUp = useCallback(() => {
-    const text = textAreaRef.current?.value;
-    if (!(text && text[text.length - 1] === '@')) {
-      return;
-    }
-
-    const startPos = textAreaRef.current?.selectionStart;
-    if (!startPos) {
-      return;
-    }
-
-    const isAtStart = startPos === 1;
-    const isPrecededBySpace = textAreaRef.current?.value.charAt(startPos - 2) === ' ';
-
-    setShowMentionPopover(isAtStart || isPrecededBySpace);
-  }, [textAreaRef, setShowMentionPopover]);
-
   const handleKeyDown = useCallback(
     (e: KeyEvent) => {
       if (e.key === 'Enter' && isSubmitting) {
@@ -227,7 +207,6 @@ export default function useTextarea({
   return {
     textAreaRef,
     handlePaste,
-    handleKeyUp,
     handleKeyDown,
     handleCompositionStart,
     handleCompositionEnd,
