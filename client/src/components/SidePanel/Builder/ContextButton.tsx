@@ -1,24 +1,29 @@
 import * as Popover from '@radix-ui/react-popover';
-import type { Assistant, AssistantCreateParams } from 'librechat-data-provider';
+import type { Assistant, AssistantCreateParams, AssistantsEndpoint } from 'librechat-data-provider';
 import type { UseMutationResult } from '@tanstack/react-query';
 import { Dialog, DialogTrigger, Label } from '~/components/ui';
-import DialogTemplate from '~/components/ui/DialogTemplate';
+import { useChatContext, useToastContext } from '~/Providers';
 import { useDeleteAssistantMutation } from '~/data-provider';
+import DialogTemplate from '~/components/ui/DialogTemplate';
 import { useLocalize, useSetIndexOptions } from '~/hooks';
 import { cn, removeFocusOutlines } from '~/utils/';
 import { NewTrashIcon } from '~/components/svg';
-import { useChatContext } from '~/Providers';
 
 export default function ContextButton({
+  activeModel,
   assistant_id,
   setCurrentAssistantId,
   createMutation,
+  endpoint,
 }: {
+  activeModel: string;
   assistant_id: string;
   setCurrentAssistantId: React.Dispatch<React.SetStateAction<string | undefined>>;
   createMutation: UseMutationResult<Assistant, Error, AssistantCreateParams>;
+  endpoint: AssistantsEndpoint;
 }) {
   const localize = useLocalize();
+  const { showToast } = useToastContext();
   const { conversation } = useChatContext();
   const { setOption } = useSetIndexOptions();
 
@@ -28,6 +33,11 @@ export default function ContextButton({
       if (!updatedList) {
         return;
       }
+
+      showToast({
+        message: localize('com_ui_assistant_deleted'),
+        status: 'success',
+      });
 
       if (createMutation.data?.id) {
         console.log('[deleteAssistant] resetting createMutation');
@@ -53,6 +63,13 @@ export default function ContextButton({
 
       setCurrentAssistantId(firstAssistant.id);
     },
+    onError: (error) => {
+      console.error(error);
+      showToast({
+        message: localize('com_ui_assistant_delete_error'),
+        status: 'error',
+      });
+    },
   });
 
   if (!assistant_id) {
@@ -65,7 +82,7 @@ export default function ContextButton({
         <Popover.Trigger asChild>
           <button
             className={cn(
-              'btn btn-neutral border-token-border-light relative h-9 rounded-lg font-medium',
+              'btn border-token-border-light relative h-9 rounded-lg bg-transparent font-medium hover:bg-gray-100 dark:hover:bg-gray-800',
               removeFocusOutlines,
             )}
             type="button"
@@ -103,7 +120,7 @@ export default function ContextButton({
           <Popover.Content
             side="top"
             role="menu"
-            className="bg-token-surface-primary min-w-[180px] max-w-xs rounded-lg border border-gray-100 bg-white shadow-lg dark:border-gray-700 dark:bg-black"
+            className="bg-token-surface-primary min-w-[180px] max-w-xs rounded-lg border border-gray-100 bg-white shadow-lg dark:border-gray-900 dark:bg-gray-850"
             style={{ outline: 'none', pointerEvents: 'auto' }}
             sideOffset={8}
             tabIndex={-1}
@@ -136,7 +153,8 @@ export default function ContextButton({
             </>
           }
           selection={{
-            selectHandler: () => deleteAssistant.mutate({ assistant_id }),
+            selectHandler: () =>
+              deleteAssistant.mutate({ assistant_id, model: activeModel, endpoint }),
             selectClasses: 'bg-red-600 hover:bg-red-700 dark:hover:bg-red-800 text-white',
             selectText: localize('com_ui_delete'),
           }}

@@ -3,10 +3,10 @@ import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Constants,
-  EModelEndpoint,
   QueryKeys,
-  parseCompactConvo,
   ContentTypes,
+  parseCompactConvo,
+  isAssistantsEndpoint,
 } from 'librechat-data-provider';
 import { useRecoilState, useResetRecoilState, useSetRecoilState } from 'recoil';
 import { useGetMessagesByConvoId } from 'librechat-data-provider/react-query';
@@ -94,6 +94,7 @@ export default function useChatHelpers(index = 0, paramId: string | undefined) {
     {
       editedText = null,
       editedMessageId = null,
+      resubmitFiles = false,
       isRegenerate = false,
       isContinued = false,
       isEdited = false,
@@ -140,7 +141,10 @@ export default function useChatHelpers(index = 0, paramId: string | undefined) {
       (msg) => msg.messageId === latestMessage?.parentMessageId,
     );
 
-    const thread_id = parentMessage?.thread_id ?? latestMessage?.thread_id;
+    let thread_id = parentMessage?.thread_id ?? latestMessage?.thread_id;
+    if (!thread_id) {
+      thread_id = currentMessages.find((message) => message.thread_id)?.thread_id;
+    }
 
     const endpointsConfig = queryClient.getQueryData<TEndpointsConfig>([QueryKeys.endpoints]);
     const endpointType = getEndpointField(endpointsConfig, endpoint, 'type');
@@ -174,7 +178,7 @@ export default function useChatHelpers(index = 0, paramId: string | undefined) {
       error: false,
     };
 
-    const reuseFiles = isRegenerate && parentMessage?.files;
+    const reuseFiles = (isRegenerate || resubmitFiles) && parentMessage?.files;
     if (reuseFiles && parentMessage.files?.length) {
       currentMsg.files = parentMessage.files;
       setFiles(new Map());
@@ -207,10 +211,11 @@ export default function useChatHelpers(index = 0, paramId: string | undefined) {
       unfinished: false,
       isCreatedByUser: false,
       isEdited: isEditOrContinue,
+      iconURL: convo.iconURL,
       error: false,
     };
 
-    if (endpoint === EModelEndpoint.assistants) {
+    if (isAssistantsEndpoint(endpoint)) {
       initialResponse.model = conversation?.assistant_id ?? '';
       initialResponse.text = '';
       initialResponse.content = [
@@ -235,7 +240,7 @@ export default function useChatHelpers(index = 0, paramId: string | undefined) {
         conversationId,
       },
       endpointOption,
-      message: {
+      userMessage: {
         ...currentMsg,
         generation,
         responseMessageId,

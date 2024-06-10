@@ -1,41 +1,25 @@
+const {
+  Capabilities,
+  EModelEndpoint,
+  isAssistantsEndpoint,
+  defaultRetrievalModels,
+  defaultAssistantsVersion,
+} = require('librechat-data-provider');
+const { getCitations, citeText } = require('./citations');
 const partialRight = require('lodash/partialRight');
 const { sendMessage } = require('./streamResponse');
-const { getCitations, citeText } = require('./citations');
 const citationRegex = /\[\^\d+?\^]/g;
 
 const addSpaceIfNeeded = (text) => (text.length > 0 && !text.endsWith(' ') ? text + ' ' : text);
 
 const createOnProgress = ({ generation = '', onProgress: _onProgress }) => {
   let i = 0;
-  let code = '';
-  let precode = '';
-  let codeBlock = false;
   let tokens = addSpaceIfNeeded(generation);
 
   const progressCallback = async (partial, { res, text, bing = false, ...rest }) => {
     let chunk = partial === text ? '' : partial;
     tokens += chunk;
-    precode += chunk;
     tokens = tokens.replaceAll('[DONE]', '');
-
-    if (codeBlock) {
-      code += chunk;
-    }
-
-    if (precode.includes('```') && codeBlock) {
-      codeBlock = false;
-      precode = precode.replace(/```/g, '');
-      code = '';
-    }
-
-    if (precode.includes('```') && code === '') {
-      precode = precode.replace(/```/g, '');
-      codeBlock = true;
-    }
-
-    if (tokens.match(/^\n(?!:::plugins:::)/)) {
-      tokens = tokens.replace(/^\n/, '');
-    }
 
     if (bing) {
       tokens = citeText(tokens, true);
@@ -176,9 +160,10 @@ const isUserProvided = (value) => value === 'user_provided';
  * Generate the configuration for a given key and base URL.
  * @param {string} key
  * @param {string} baseURL
+ * @param {string} endpoint
  * @returns {boolean | { userProvide: boolean, userProvideURL?: boolean }}
  */
-function generateConfig(key, baseURL) {
+function generateConfig(key, baseURL, endpoint) {
   if (!key) {
     return false;
   }
@@ -188,6 +173,25 @@ function generateConfig(key, baseURL) {
 
   if (baseURL) {
     config.userProvideURL = isUserProvided(baseURL);
+  }
+
+  const assistants = isAssistantsEndpoint(endpoint);
+
+  if (assistants) {
+    config.retrievalModels = defaultRetrievalModels;
+    config.capabilities = [
+      Capabilities.code_interpreter,
+      Capabilities.image_vision,
+      Capabilities.retrieval,
+      Capabilities.actions,
+      Capabilities.tools,
+    ];
+  }
+
+  if (assistants && endpoint === EModelEndpoint.azureAssistants) {
+    config.version = defaultAssistantsVersion.azureAssistants;
+  } else if (assistants) {
+    config.version = defaultAssistantsVersion.assistants;
   }
 
   return config;
