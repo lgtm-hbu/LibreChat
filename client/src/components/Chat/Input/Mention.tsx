@@ -6,22 +6,28 @@ import useSelectMention from '~/hooks/Input/useSelectMention';
 import { useAssistantsMapContext } from '~/Providers';
 import useMentions from '~/hooks/Input/useMentions';
 import { useLocalize, useCombobox } from '~/hooks';
-import { removeAtSymbolIfLast } from '~/utils';
+import { removeCharIfLast } from '~/utils';
 import MentionItem from './MentionItem';
 
 export default function Mention({
   setShowMentionPopover,
   newConversation,
   textAreaRef,
+  commandChar = '@',
+  placeholder = 'com_ui_mention',
+  includeAssistants = true,
 }: {
   setShowMentionPopover: SetterOrUpdater<boolean>;
   newConversation: ConvoGenerator;
   textAreaRef: React.MutableRefObject<HTMLTextAreaElement | null>;
+  commandChar?: string;
+  placeholder?: string;
+  includeAssistants?: boolean;
 }) {
   const localize = useLocalize();
   const assistantMap = useAssistantsMapContext();
   const { options, presets, modelSpecs, modelsConfig, endpointsConfig, assistantListMap } =
-    useMentions({ assistantMap });
+    useMentions({ assistantMap, includeAssistants });
   const { onSelectMention } = useSelectMention({
     presets,
     modelSpecs,
@@ -52,7 +58,7 @@ export default function Mention({
       onSelectMention(mention);
 
       if (textAreaRef.current) {
-        removeAtSymbolIfLast(textAreaRef.current);
+        removeCharIfLast(textAreaRef.current, commandChar);
       }
     };
 
@@ -108,7 +114,7 @@ export default function Mention({
         <input
           autoFocus
           ref={inputRef}
-          placeholder={localize('com_ui_mention')}
+          placeholder={localize(placeholder)}
           className="mb-1 w-full border-0 bg-white p-2 text-sm focus:outline-none dark:bg-gray-700 dark:text-gray-200"
           autoComplete="off"
           value={searchValue}

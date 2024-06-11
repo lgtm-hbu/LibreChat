@@ -7,11 +7,12 @@ import {
   isAssistantsEndpoint,
   fileConfig as defaultFileConfig,
 } from 'librechat-data-provider';
+import { useRequiresKey, useTextarea, useHandleKeyUp, useAddedResponse } from '~/hooks';
 import { useChatContext, useAssistantsMapContext } from '~/Providers';
-import { useRequiresKey, useTextarea, useHandleKeyUp } from '~/hooks';
 import { TextareaAutosize } from '~/components/ui';
 import { useGetFileConfig } from '~/data-provider';
 import { cn, removeFocusRings } from '~/utils';
+import TextareaHeader from './TextareaHeader';
 import AttachFile from './Files/AttachFile';
 import AudioRecorder from './AudioRecorder';
 import { mainTextareaId } from '~/common';
@@ -23,22 +24,23 @@ import Mention from './Mention';
 import store from '~/store';
 
 const ChatForm = ({ index = 0 }) => {
+  const { requiresKey } = useRequiresKey();
   const submitButtonRef = useRef<HTMLButtonElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const SpeechToText = useRecoilValue(store.SpeechToText);
   const TextToSpeech = useRecoilValue(store.TextToSpeech);
   const automaticPlayback = useRecoilValue(store.automaticPlayback);
   const [showStopButton, setShowStopButton] = useRecoilState(store.showStopButtonByIndex(index));
+  const [showPlusPopover, setShowPlusPopover] = useRecoilState(store.showPlusPopoverFamily(index));
   const [showMentionPopover, setShowMentionPopover] = useRecoilState(
     store.showMentionPopoverFamily(index),
   );
-  const { requiresKey } = useRequiresKey();
 
   const methods = useForm<{ text: string }>({
     defaultValues: { text: '' },
   });
 
-  const handleKeyUp = useHandleKeyUp({ index, textAreaRef });
+  const handleKeyUp = useHandleKeyUp({ textAreaRef, setShowPlusPopover, setShowMentionPopover });
   const { handlePaste, handleKeyDown, handleCompositionStart, handleCompositionEnd } = useTextarea({
     textAreaRef,
     submitButtonRef,
@@ -56,6 +58,11 @@ const ChatForm = ({ index = 0 }) => {
     newConversation,
     handleStopGenerating,
   } = useChatContext();
+  const {
+    generateConversation,
+    conversation: addedConvo,
+    setConversation: setAddedConvo,
+  } = useAddedResponse({ rootIndex: index });
 
   const assistantMap = useAssistantsMapContext();
 
@@ -104,6 +111,16 @@ const ChatForm = ({ index = 0 }) => {
     >
       <div className="relative flex h-full flex-1 items-stretch md:flex-col">
         <div className="flex w-full items-center">
+          {showPlusPopover && !isAssistantsEndpoint(endpoint) && (
+            <Mention
+              setShowMentionPopover={setShowPlusPopover}
+              newConversation={generateConversation}
+              textAreaRef={textAreaRef}
+              commandChar="+"
+              placeholder="com_ui_add"
+              includeAssistants={false}
+            />
+          )}
           {showMentionPopover && (
             <Mention
               setShowMentionPopover={setShowMentionPopover}
@@ -112,6 +129,7 @@ const ChatForm = ({ index = 0 }) => {
             />
           )}
           <div className="bg-token-main-surface-primary relative flex w-full flex-grow flex-col overflow-hidden rounded-2xl border dark:border-gray-600 dark:text-white [&:has(textarea:focus)]:border-gray-300 [&:has(textarea:focus)]:shadow-[0_2px_6px_rgba(0,0,0,.05)] dark:[&:has(textarea:focus)]:border-gray-500">
+            <TextareaHeader addedConvo={addedConvo} setAddedConvo={setAddedConvo} />
             <FileRow
               files={files}
               setFiles={setFiles}

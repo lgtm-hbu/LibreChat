@@ -7,19 +7,19 @@ import useChatFunctions from '~/hooks/Chat/useChatFunctions';
 import store from '~/store';
 
 // this to be set somewhere else
-export default function useAdditionalResponse({
-  rootTndex = 0,
+export default function useAddedHelpers({
+  rootIndex = 0,
   currentIndex,
   paramId,
 }: {
-  rootTndex: number;
+  rootIndex?: number;
   currentIndex: number;
   paramId?: string;
 }) {
   const queryClient = useQueryClient();
 
-  const [files, setFiles] = useRecoilState(store.filesByIndex(rootTndex));
-  const latestMessage = useRecoilValue(store.latestMessageFamily(rootTndex));
+  const [files, setFiles] = useRecoilState(store.filesByIndex(rootIndex));
+  const latestMessage = useRecoilValue(store.latestMessageFamily(rootIndex));
 
   const { useCreateConversationAtom } = store;
   const { conversation, setConversation } = useCreateConversationAtom(currentIndex);

@@ -41,7 +41,10 @@ const conversationByIndex = atomFamily<TConversation | null, string | number>({
         }
 
         storeEndpointSettings(newValue);
-        localStorage.setItem(LocalStorageKeys.LAST_CONVO_SETUP, JSON.stringify(newValue));
+        localStorage.setItem(
+          `${LocalStorageKeys.LAST_CONVO_SETUP}_${index}`,
+          JSON.stringify(newValue),
+        );
       });
     },
   ] as const,
@@ -120,6 +123,11 @@ const showMentionPopoverFamily = atomFamily<boolean, string | number | null>({
   default: false,
 });
 
+const showPlusPopoverFamily = atomFamily<boolean, string | number | null>({
+  key: 'showPlusPopoverByIndex',
+  default: false,
+});
+
 const globalAudioURLFamily = atomFamily<string | null, string | number | null>({
   key: 'globalAudioURLByIndex',
   default: null,
@@ -165,12 +173,17 @@ function useCreateConversationAtom(key: string | number) {
 }
 
 function useClearConvoState() {
+  /** Clears all active conversations. Pass `true` to skip the first or root conversation */
   const clearAllConversations = useRecoilCallback(
     ({ reset, snapshot }) =>
-      async () => {
+      async (skipFirst?: boolean) => {
         const conversationKeys = await snapshot.getPromise(conversationKeysAtom);
 
         for (const conversationKey of conversationKeys) {
+          if (skipFirst && conversationKey == 0) {
+            continue;
+          }
+
           reset(conversationByIndex(conversationKey));
 
           const conversation = await snapshot.getPromise(conversationByIndex(conversationKey));
@@ -210,4 +223,5 @@ export default {
   audioRunFamily,
   globalAudioPlayingFamily,
   globalAudioFetchingFamily,
+  showPlusPopoverFamily,
 };
