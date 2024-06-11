@@ -9,6 +9,7 @@ import type {
   TPlugin,
   TMessage,
   Assistant,
+  TResPlugin,
   TLoginUser,
   AuthTypeEnum,
   TModelsConfig,
@@ -415,3 +416,15 @@ export type NewConversationParams = {
 };
 
 export type ConvoGenerator = (params: NewConversationParams) => void | TConversation;
+
+export type TResData = {
+  plugin?: TResPlugin;
+  final?: boolean;
+  initial?: boolean;
+  previousMessages?: TMessage[];
+  requestMessage: TMessage;
+  responseMessage: TMessage;
+  conversation: TConversation;
+  conversationId?: string;
+  runMessages?: TMessage[];
+};

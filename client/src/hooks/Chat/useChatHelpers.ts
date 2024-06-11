@@ -10,7 +10,7 @@ import useNewConvo from '~/hooks/useNewConvo';
 import store from '~/store';
 
 // this to be set somewhere else
-export default function useChatHelpers(index = 0, paramId: string | undefined) {
+export default function useChatHelpers(index = 0, paramId?: string) {
   const [files, setFiles] = useRecoilState(store.filesByIndex(index));
   const [filesLoading, setFilesLoading] = useState(false);
 
@@ -41,7 +41,6 @@ export default function useChatHelpers(index = 0, paramId: string | undefined) {
     (messages: TMessage[]) => {
       queryClient.setQueryData<TMessage[]>([QueryKeys.messages, queryParam], messages);
     },
-    // [conversationId, queryClient],
     [queryParam, queryClient],
   );
 
