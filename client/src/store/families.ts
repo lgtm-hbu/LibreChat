@@ -1,7 +1,8 @@
 import {
   atom,
-  atomFamily,
   selector,
+  atomFamily,
+  selectorFamily,
   useRecoilState,
   useRecoilValue,
   useSetRecoilState,
@@ -200,6 +201,16 @@ function useClearConvoState() {
   return clearAllConversations;
 }
 
+const conversationByKeySelector = selectorFamily({
+  key: 'conversationByKeySelector',
+  get:
+    (index: string | number) =>
+      ({ get }) => {
+        const conversation = get(conversationByIndex(index));
+        return conversation;
+      },
+});
+
 export default {
   conversationByIndex,
   filesByIndex,
@@ -215,6 +226,7 @@ export default {
   showPopoverFamily,
   latestMessageFamily,
   allConversationsSelector,
+  conversationByKeySelector,
   useClearConvoState,
   useCreateConversationAtom,
   showMentionPopoverFamily,
