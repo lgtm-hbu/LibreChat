@@ -1,4 +1,5 @@
-import { useCallback, useRef } from 'react';
+import { useRecoilValue } from 'recoil';
+import { useCallback, useRef, useEffect } from 'react';
 import { LocalStorageKeys, isAssistantsEndpoint } from 'librechat-data-provider';
 import { useGetModelsQuery, useGetEndpointsQuery } from 'librechat-data-provider/react-query';
 import type {
@@ -7,23 +8,44 @@ import type {
   TConversation,
   TEndpointsConfig,
 } from 'librechat-data-provider';
+import type { SetterOrUpdater } from 'recoil';
 import type { AssistantListItem } from '~/common';
 import { getEndpointField, buildDefaultConvo, getDefaultEndpoint } from '~/utils';
 import useAssistantListMap from '~/hooks/Assistants/useAssistantListMap';
 import { mainTextareaId } from '~/common';
+import store from '~/store';
 
 const useGenerateConvo = ({
   index = 0,
+  rootIndex,
   setConversation,
 }: {
   index?: number;
-  setConversation?: (convo: TConversation) => void;
+  rootIndex: number;
+  setConversation?: SetterOrUpdater<TConversation | null>;
 }) => {
   const modelsQuery = useGetModelsQuery();
   const assistantsListMap = useAssistantListMap();
   const { data: endpointsConfig = {} as TEndpointsConfig } = useGetEndpointsQuery();
 
   const timeoutIdRef = useRef<NodeJS.Timeout>();
+  const rootConvo = useRecoilValue(store.conversationByKeySelector(rootIndex));
+
+  useEffect(() => {
+    if (rootConvo?.conversationId && setConversation) {
+      setConversation((prevState) => {
+        if (!prevState) {
+          return prevState;
+        }
+        const update = {
+          ...prevState,
+          conversationId: rootConvo.conversationId,
+        } as TConversation;
+
+        return update;
+      });
+    }
+  }, [rootConvo?.conversationId, setConversation]);
 
   const generateConversation = useCallback(
     ({
@@ -43,6 +65,10 @@ const useGenerateConvo = ({
         createdAt: '',
         updatedAt: '',
       };
+
+      if (rootConvo?.conversationId) {
+        conversation.conversationId = rootConvo.conversationId;
+      }
 
       const modelsConfig = modelsData ?? modelsQuery.data;
 
@@ -112,7 +138,7 @@ const useGenerateConvo = ({
       }, 150);
       return conversation;
     },
-    [assistantsListMap, endpointsConfig, index, modelsQuery.data, setConversation],
+    [assistantsListMap, endpointsConfig, index, modelsQuery.data, rootConvo, setConversation],
   );
 
   return { generateConversation };

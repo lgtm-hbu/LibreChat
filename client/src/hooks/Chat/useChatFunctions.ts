@@ -63,6 +63,7 @@ export default function useChatFunctions({
       isRegenerate = false,
       isContinued = false,
       isEdited = false,
+      overrideMessages,
     } = {},
   ) => {
     setShowStopButton(false);
@@ -89,7 +90,7 @@ export default function useChatFunctions({
 
     const isEditOrContinue = isEdited || isContinued;
 
-    let currentMessages: TMessage[] | null = getMessages() ?? [];
+    let currentMessages: TMessage[] | null = overrideMessages ?? getMessages() ?? [];
 
     // construct the query message
     // this is not a real messageId, it is used as placeholder before real messageId returned
@@ -228,6 +229,8 @@ export default function useChatFunctions({
       setLatestMessage(initialResponse);
     }
     setSubmission(submission);
+    console.log('[TESTING] Submission:', submission);
+    console.dir(submission, { depth: null });
   };
 
   const regenerate = ({ parentMessageId }) => {

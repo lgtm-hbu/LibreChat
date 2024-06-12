@@ -7,8 +7,9 @@ import {
   isAssistantsEndpoint,
   fileConfig as defaultFileConfig,
 } from 'librechat-data-provider';
-import { useRequiresKey, useTextarea, useHandleKeyUp, useAddedResponse } from '~/hooks';
-import { useChatContext, useAssistantsMapContext } from '~/Providers';
+import type { TMessage } from 'librechat-data-provider';
+import { useChatContext, useAddedChatContext, useAssistantsMapContext } from '~/Providers';
+import { useRequiresKey, useTextarea, useHandleKeyUp } from '~/hooks';
 import { TextareaAutosize } from '~/components/ui';
 import { useGetFileConfig } from '~/data-provider';
 import { cn, removeFocusRings } from '~/utils';
@@ -24,12 +25,13 @@ import Mention from './Mention';
 import store from '~/store';
 
 const ChatForm = ({ index = 0 }) => {
-  const { requiresKey } = useRequiresKey();
   const submitButtonRef = useRef<HTMLButtonElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+
   const SpeechToText = useRecoilValue(store.SpeechToText);
   const TextToSpeech = useRecoilValue(store.TextToSpeech);
   const automaticPlayback = useRecoilValue(store.automaticPlayback);
+  const activeConvos = useRecoilValue(store.allConversationsSelector);
   const [showStopButton, setShowStopButton] = useRecoilState(store.showStopButtonByIndex(index));
   const [showPlusPopover, setShowPlusPopover] = useRecoilState(store.showPlusPopoverFamily(index));
   const [showMentionPopover, setShowMentionPopover] = useRecoilState(
@@ -40,6 +42,7 @@ const ChatForm = ({ index = 0 }) => {
     defaultValues: { text: '' },
   });
 
+  const { requiresKey } = useRequiresKey();
   const handleKeyUp = useHandleKeyUp({ textAreaRef, setShowPlusPopover, setShowMentionPopover });
   const { handlePaste, handleKeyDown, handleCompositionStart, handleCompositionEnd } = useTextarea({
     textAreaRef,
@@ -51,6 +54,7 @@ const ChatForm = ({ index = 0 }) => {
     ask,
     files,
     setFiles,
+    getMessages,
     conversation,
     isSubmitting,
     filesLoading,
@@ -59,10 +63,12 @@ const ChatForm = ({ index = 0 }) => {
     handleStopGenerating,
   } = useChatContext();
   const {
+    addedIndex,
+    ask: askAdditional,
     generateConversation,
     conversation: addedConvo,
     setConversation: setAddedConvo,
-  } = useAddedResponse({ rootIndex: index });
+  } = useAddedChatContext();
 
   const assistantMap = useAssistantsMapContext();
 
@@ -71,10 +77,16 @@ const ChatForm = ({ index = 0 }) => {
       if (!data) {
         return console.warn('No data provided to submitMessage');
       }
+      const hasAdded = addedIndex && activeConvos[addedIndex] && addedConvo;
+      let rootMessages: TMessage[] | undefined;
+      if (hasAdded) {
+        rootMessages = getMessages();
+      }
       ask({ text: data.text });
+      hasAdded && askAdditional({ text: data.text }, { overrideMessages: rootMessages });
       methods.reset();
     },
-    [ask, methods],
+    [activeConvos, addedIndex, addedConvo, methods, ask, askAdditional, getMessages],
   );
 
   const { endpoint: _endpoint, endpointType } = conversation ?? { endpoint: null };

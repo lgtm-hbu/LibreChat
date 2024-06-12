@@ -239,6 +239,7 @@ export type TOptions = {
   isRegenerate?: boolean;
   isContinued?: boolean;
   isEdited?: boolean;
+  overrideMessages?: TMessage[];
 };
 
 export type TAskFunction = (props: TAskProps, options?: TOptions) => void;
