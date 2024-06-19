@@ -75,11 +75,11 @@ function AuthLayout({
         <ThemeSelector />
       </div>
 
-      <div className="flex flex-grow items-center justify-center">
-        <div className="w-authPageWidth overflow-hidden bg-white px-6 py-4 dark:bg-gray-900 sm:max-w-md sm:rounded-lg">
+      <div className="mb-20 flex flex-grow items-center justify-center md:mb-32">
+        <div className="w-authPageWidth overflow-hidden bg-transparent px-6 py-4 sm:max-w-md sm:rounded-lg ">
           {!startupConfigError && !isFetching && (
             <h1
-              className="mb-4 text-center text-3xl font-semibold text-black dark:text-white"
+              className="mb-4 text-center font-playfair text-2xl text-text-primary"
               style={{ userSelect: 'none' }}
             >
               {header}

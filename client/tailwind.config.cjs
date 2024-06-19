@@ -18,6 +18,10 @@ module.exports = {
     //   mono: ['Söhne Mono', 'monospace'],
     // },
     extend: {
+      fontFamily: {
+        playfair: ['"Playfair Display"', 'serif'],
+        lato: ['Lato', 'sans-serif'],
+      },
       width: {
         'authPageWidth': '370px',
       },
@@ -65,7 +69,7 @@ module.exports = {
           900: '#031f29',
         },
         'brand-purple': '#ab68ff',
-        'text-primary': 'var(--gray-800)',
+        'text-primary': 'var(--text-primary)',
         'text-secondary': 'var(--gray-600)',
         'text-tertiary': 'var(--gray-500)',
         'surface-primary': 'var(--surface-primary)',
@@ -75,7 +79,14 @@ module.exports = {
         'border-medium': 'var(--gray-200)',
         'border-heavy': 'var(--gray-300)',
         'border-xheavy': 'var(--gray-400',
+        'rippl-yellow': '#FCB631',
+        'rippl-yellow-cta-gradient-top': '#FCB631',
+        'rippl-yellow-cta-gradient-bottom': '#FC9631',
+        'navy-blue': '#011D29',
       },
+      backgroundImage: () => ({
+        'yellow-cta': 'linear-gradient(to bottom, var(--yellow-cta-gradient-top), var(--yellow-cta-gradient-bottom))',
+      }),
     },
   },
   plugins: [
