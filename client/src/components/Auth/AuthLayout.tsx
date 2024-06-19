@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ThemeSelector } from '~/components/ui';
 import { useLocalize, useThemeContext, isDark } from '~/hooks';
 import { BlinkAnimation } from './BlinkAnimation';
@@ -56,18 +57,22 @@ function AuthLayout({
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-surface-primary">
+    <div
+      className="relative flex min-h-screen flex-col bg-surface-primary"
+      style={{
+        backgroundImage: `url(/assets/stars-${isDark(theme) ? 'dark' : 'light'}.png)`,
+        backgroundSize: '30%',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'right 0% bottom 0%',
+      }}
+    >
       <BlinkAnimation active={isFetching}>
         <div className="mt-12 h-24 w-full bg-cover">
-          {isDark(theme) ? (
-            <img src="/assets/rippl-dark.svg" className="h-full w-full object-contain" alt="Logo" />
-          ) : (
-            <img
-              src="/assets/rippl-light.svg"
-              className="h-full w-full object-contain"
-              alt="Logo"
-            />
-          )}
+          <img
+            src={`/assets/rippl-${isDark(theme) ? 'dark' : 'light'}.svg`}
+            className="h-full w-full object-contain"
+            alt="Logo"
+          />
         </div>
       </BlinkAnimation>
       <DisplayError />
