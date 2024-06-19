@@ -85,7 +85,7 @@ module.exports = {
         'navy-blue': '#011D29',
       },
       backgroundImage: () => ({
-        'yellow-cta': 'linear-gradient(to bottom, var(--yellow-cta-gradient-top), var(--yellow-cta-gradient-bottom))',
+        'rippl-yellow-cta': 'linear-gradient(to bottom, var(--rippl-yellow-cta-gradient-top), var(--rippl-yellow-cta-gradient-bottom))',
       }),
     },
   },

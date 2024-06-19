@@ -1,6 +1,7 @@
 import { GoogleIcon, FacebookIcon, OpenIDIcon, GithubIcon, DiscordIcon } from '~/components';
 
 import SocialButton from './SocialButton';
+import RipplAILogin from './RipplAILogin';
 
 import { useLocalize } from '~/hooks';
 
@@ -63,18 +64,11 @@ function SocialLoginRender({
       />
     ),
     openid: startupConfig?.openidLoginEnabled && (
-      <SocialButton
+      <RipplAILogin
         key="openid"
         enabled={startupConfig.openidLoginEnabled}
         serverDomain={startupConfig.serverDomain}
         oauthPath="openid"
-        Icon={() =>
-          startupConfig.openidImageUrl ? (
-            <img src={startupConfig.openidImageUrl} alt="OpenID Logo" className="h-5 w-5" />
-          ) : (
-            <OpenIDIcon />
-          )
-        }
         label={startupConfig.openidLabel}
         id="openid"
       />
