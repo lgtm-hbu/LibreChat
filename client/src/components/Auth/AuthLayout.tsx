@@ -1,5 +1,5 @@
 import { ThemeSelector } from '~/components/ui';
-import { useLocalize } from '~/hooks';
+import { useLocalize, useThemeContext, isDark } from '~/hooks';
 import { BlinkAnimation } from './BlinkAnimation';
 import { TStartupConfig } from 'librechat-data-provider';
 import SocialLoginRender from './SocialLoginRender';
@@ -34,6 +34,7 @@ function AuthLayout({
   error: string | null;
 }) {
   const localize = useLocalize();
+  const { theme } = useThemeContext();
 
   const DisplayError = () => {
     if (startupConfigError !== null && startupConfigError !== undefined) {
@@ -55,10 +56,18 @@ function AuthLayout({
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-900">
+    <div className="relative flex min-h-screen flex-col bg-surface-primary">
       <BlinkAnimation active={isFetching}>
         <div className="mt-12 h-24 w-full bg-cover">
-          <img src="/assets/logo.svg" className="h-full w-full object-contain" alt="Logo" />
+          {isDark(theme) ? (
+            <img src="/assets/rippl-dark.svg" className="h-full w-full object-contain" alt="Logo" />
+          ) : (
+            <img
+              src="/assets/rippl-light.svg"
+              className="h-full w-full object-contain"
+              alt="Logo"
+            />
+          )}
         </div>
       </BlinkAnimation>
       <DisplayError />

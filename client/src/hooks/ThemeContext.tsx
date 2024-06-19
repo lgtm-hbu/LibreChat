@@ -40,6 +40,8 @@ export const isDark = (theme: string): boolean => {
 
 export const ThemeContext = createContext<ProviderValue>(defaultContextValue);
 
+export const useThemeContext = () => React.useContext(ThemeContext);
+
 export const ThemeProvider = ({ initialTheme, children }) => {
   const [theme, setTheme] = useState(getInitialTheme);
 
