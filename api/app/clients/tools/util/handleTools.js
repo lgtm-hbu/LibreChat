@@ -4,6 +4,7 @@ const { WebBrowser } = require('langchain/tools/webbrowser');
 const { SerpAPI, ZapierNLAWrapper } = require('langchain/tools');
 const { OpenAIEmbeddings } = require('langchain/embeddings/openai');
 const { getUserPluginAuthValue } = require('~/server/services/PluginService');
+const { createEmbedchainTools } = require('~/server/services/EmbedchainTools');
 const {
   availableTools,
   // Basic Tools
@@ -298,6 +299,14 @@ const loadTools = async ({
       map: true,
       verbose: false,
     });
+  }
+
+  if (remainingTools.length) {
+    const embedchainTools = await createEmbedchainTools();
+    specs = { ...(specs ?? {}) };
+    for (const tool of embedchainTools) {
+      specs[tool.name] = async () => tool;
+    }
   }
 
   for (const tool of remainingTools) {

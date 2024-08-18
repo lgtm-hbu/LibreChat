@@ -1,4 +1,6 @@
 const { FileSources, EModelEndpoint, getConfigDefaults } = require('librechat-data-provider');
+const { loadAndFormatTools, formatToOpenAIAssistantTool } = require('./ToolService');
+const { createEmbedchainTools } = require('~/server/services/EmbedchainTools');
 const { checkVariables, checkHealth, checkConfig, checkAzureVariables } = require('./start/checks');
 const { azureAssistantsDefaults, assistantsConfigSetup } = require('./start/assistants');
 const { initializeFirebase } = require('./Files/Firebase/initialize');
@@ -6,7 +8,6 @@ const loadCustomConfig = require('./Config/loadCustomConfig');
 const handleRateLimits = require('./Config/handleRateLimits');
 const { loadDefaultInterface } = require('./start/interface');
 const { azureConfigSetup } = require('./start/azureOpenAI');
-const { loadAndFormatTools } = require('./ToolService');
 const { initializeRoles } = require('~/models/Role');
 const paths = require('~/config/paths');
 
@@ -42,6 +43,11 @@ const AppService = async (app) => {
     adminFilter: filteredTools,
     adminIncluded: includedTools,
   });
+
+  const embedchainTools = await createEmbedchainTools();
+  for (const tool of embedchainTools) {
+    availableTools[tool.name] = formatToOpenAIAssistantTool(tool);
+  }
 
   const socialLogins =
     config?.registration?.socialLogins ?? configDefaults?.registration?.socialLogins;

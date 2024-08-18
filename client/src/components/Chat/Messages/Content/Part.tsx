@@ -1,4 +1,5 @@
 import {
+  Constants,
   ToolCallTypes,
   ContentTypes,
   imageGenTools,
@@ -117,6 +118,13 @@ export default function Part({
     part[ContentTypes.TOOL_CALL].type === ToolCallTypes.FUNCTION
   ) {
     const toolCall = part[ContentTypes.TOOL_CALL];
+
+    if (toolCall.function.name.startsWith(Constants.CONTEXT_RETRIEVAL_KEY)) {
+      return (
+        <RetrievalCall initialProgress={toolCall.progress ?? 0.1} isSubmitting={isSubmitting} />
+      );
+    }
+
     if (isImageVisionTool(toolCall)) {
       if (isSubmitting && showCursor) {
         return (

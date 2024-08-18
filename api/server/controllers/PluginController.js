@@ -1,5 +1,9 @@
 const { promises: fs } = require('fs');
 const { CacheKeys } = require('librechat-data-provider');
+const {
+  createEmbedchainTools,
+  createEmbedchainToolsConfig,
+} = require('~/server/services/EmbedchainTools');
 const { addOpenAPISpecs } = require('~/app/clients/tools/util/addOpenAPISpecs');
 const { getLogStores } = require('~/cache');
 
@@ -110,7 +114,11 @@ const getAvailableTools = async (req, res) => {
     /** @type {TPlugin[]} */
     const uniquePlugins = filterUniquePlugins(jsonData);
 
-    const authenticatedPlugins = uniquePlugins.map((plugin) => {
+    const embedchainTools = await createEmbedchainTools();
+    const embedchainToolsConfig = createEmbedchainToolsConfig(embedchainTools);
+    const uniquePluginsWithEmbedchain = uniquePlugins.concat(embedchainToolsConfig);
+
+    const authenticatedPlugins = uniquePluginsWithEmbedchain.map((plugin) => {
       if (isPluginAuthenticated(plugin)) {
         return { ...plugin, authenticated: true };
       } else {

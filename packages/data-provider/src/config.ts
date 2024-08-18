@@ -941,6 +941,10 @@ export enum TTSProviders {
 
 /** Enum for app-wide constants */
 export enum Constants {
+  /**
+   * Key for Context Retrieval (Embedchain or other retrieval tools)
+   */
+  CONTEXT_RETRIEVAL_KEY = 'context_retrieval_',
   /** Key for the app's version. */
   VERSION = 'v0.7.4',
   /** Key for the Custom Config's version (librechat.yaml). */
