@@ -1,0 +1,91 @@
+const ToolCall = require('./schema/toolCallSchema');
+
+/**
+ * Create a new tool call
+ * @param {ToolCallData} toolCallData - The tool call data
+ * @returns {Promise<ToolCallData>} The created tool call document
+ */
+async function createToolCall(toolCallData) {
+  try {
+    return await ToolCall.create(toolCallData);
+  } catch (error) {
+    throw new Error(`Error creating tool call: ${error.message}`);
+  }
+}
+
+/**
+ * Get a tool call by ID
+ * @param {string} id - The tool call document ID
+ * @returns {Promise<ToolCallData|null>} The tool call document or null if not found
+ */
+async function getToolCallById(id) {
+  try {
+    return await ToolCall.findById(id).lean();
+  } catch (error) {
+    throw new Error(`Error fetching tool call: ${error.message}`);
+  }
+}
+
+/**
+ * Get tool calls by message ID and user
+ * @param {string} messageId - The message ID
+ * @param {string} userId - The user's ObjectId
+ * @returns {Promise<Array>} Array of tool call documents
+ */
+async function getToolCallsByMessage(messageId, userId) {
+  try {
+    return await ToolCall.find({ messageId, user: userId }).lean();
+  } catch (error) {
+    throw new Error(`Error fetching tool calls: ${error.message}`);
+  }
+}
+
+/**
+ * Get tool calls by conversation ID and user
+ * @param {string} conversationId - The conversation ID
+ * @param {string} userId - The user's ObjectId
+ * @returns {Promise<ToolCallData[]>} Array of tool call documents
+ */
+async function getToolCallsByConvo(conversationId, userId) {
+  try {
+    return await ToolCall.find({ conversationId, user: userId }).lean();
+  } catch (error) {
+    throw new Error(`Error fetching tool calls: ${error.message}`);
+  }
+}
+
+/**
+ * Update a tool call
+ * @param {string} id - The tool call document ID
+ * @param {Partial<ToolCallData>} updateData - The data to update
+ * @returns {Promise<ToolCallData|null>} The updated tool call document or null if not found
+ */
+async function updateToolCall(id, updateData) {
+  try {
+    return await ToolCall.findByIdAndUpdate(id, updateData, { new: true }).lean();
+  } catch (error) {
+    throw new Error(`Error updating tool call: ${error.message}`);
+  }
+}
+
+/**
+ * Delete a tool call
+ * @param {string} id - The tool call document ID
+ * @returns {Promise<ToolCallData|null>} The deleted tool call document or null if not found
+ */
+async function deleteToolCall(id) {
+  try {
+    return await ToolCall.findByIdAndDelete(id);
+  } catch (error) {
+    throw new Error(`Error deleting tool call: ${error.message}`);
+  }
+}
+
+module.exports = {
+  createToolCall,
+  updateToolCall,
+  deleteToolCall,
+  getToolCallById,
+  getToolCallsByConvo,
+  getToolCallsByMessage,
+};

@@ -462,6 +462,7 @@ class AgentClient extends BaseClient {
         agent: this.options.agent,
         tools: this.options.tools,
         runId: this.responseMessageId,
+        signal: abortController.signal,
         modelOptions: this.modelOptions,
         customHandlers: this.options.eventHandlers,
       });

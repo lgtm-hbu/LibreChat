@@ -82,6 +82,7 @@ module.exports = {
         update.conversationId = newConversationId;
       }
 
+      /** Note: the resulting Model object is necessary for Meilisearch operations */
       const conversation = await Conversation.findOneAndUpdate(
         { conversationId, user: req.user.id },
         update,
