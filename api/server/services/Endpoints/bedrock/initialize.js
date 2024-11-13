@@ -50,10 +50,12 @@ const initializeClient = async ({ req, res, endpointOption }) => {
     agent.max_context_tokens ??
     getModelMaxTokens(modelOptions.model, providerEndpointMap[agent.provider]);
 
-  const sender = getResponseSender({
-    ...endpointOption,
-    model: endpointOption.model_parameters.model,
-  });
+  const sender =
+    agent.name ??
+    getResponseSender({
+      ...endpointOption,
+      model: endpointOption.model_parameters.model,
+    });
 
   const client = new AgentClient({
     req,

@@ -90,10 +90,12 @@ const initializeClient = async ({ req, res, endpointOption }) => {
     modelOptions.configuration = options.configOptions;
   }
 
-  const sender = getResponseSender({
-    ...endpointOption,
-    model: endpointOption.model_parameters.model,
-  });
+  const sender =
+    agent.name ??
+    getResponseSender({
+      ...endpointOption,
+      model: endpointOption.model_parameters.model,
+    });
 
   const client = new AgentClient({
     req,
