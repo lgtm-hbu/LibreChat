@@ -337,11 +337,10 @@ const uploadImageBuffer = async ({ req, context, metadata = {}, resize = true })
  * @param {Object} params - The parameters object.
  * @param {Express.Request} params.req - The Express request object.
  * @param {Express.Response} params.res - The Express response object.
- * @param {Express.Multer.File} params.file - The uploaded file.
  * @param {FileMetadata} params.metadata - Additional metadata for the file.
  * @returns {Promise<void>}
  */
-const processFileUpload = async ({ req, res, file, metadata }) => {
+const processFileUpload = async ({ req, res, metadata }) => {
   const isAssistantUpload = isAssistantsEndpoint(metadata.endpoint);
   const assistantSource =
     metadata.endpoint === EModelEndpoint.azureAssistants ? FileSources.azure : FileSources.openai;
@@ -355,6 +354,7 @@ const processFileUpload = async ({ req, res, file, metadata }) => {
     ({ openai } = await getOpenAIClient({ req }));
   }
 
+  const { file } = req;
   const {
     id,
     bytes,
