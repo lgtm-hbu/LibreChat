@@ -50,6 +50,9 @@ const convoSchema = mongoose.Schema(
       default: [],
       meiliIndex: true,
     },
+    files: {
+      type: [String],
+    },
   },
   { timestamps: true },
 );
