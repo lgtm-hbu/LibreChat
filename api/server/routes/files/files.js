@@ -213,21 +213,20 @@ router.get('/download/:userId/:file_id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const file = req.file;
   const metadata = req.body;
   let cleanup = true;
 
   try {
-    filterFile({ req, file });
+    filterFile({ req });
 
     metadata.temp_file_id = metadata.file_id;
     metadata.file_id = req.file_id;
 
     if (isAgentsEndpoint(metadata.endpoint)) {
-      return await processAgentFileUpload({ req, res, file, metadata });
+      return await processAgentFileUpload({ req, res, metadata });
     }
 
-    await processFileUpload({ req, res, file, metadata });
+    await processFileUpload({ req, res, metadata });
   } catch (error) {
     let message = 'Error processing file';
     logger.error('[/files] Error processing file:', error);
@@ -238,7 +237,7 @@ router.post('/', async (req, res) => {
 
     // TODO: delete remote file if it exists
     try {
-      await fs.unlink(file.path);
+      await fs.unlink(req.file.path);
       cleanup = false;
     } catch (error) {
       logger.error('[/files] Error deleting file:', error);
@@ -248,7 +247,7 @@ router.post('/', async (req, res) => {
 
   if (cleanup) {
     try {
-      await fs.unlink(file.path);
+      await fs.unlink(req.file.path);
     } catch (error) {
       logger.error('[/files] Error deleting file after file processing:', error);
     }

@@ -244,12 +244,12 @@ const processFileURL = async ({ fileStrategy, userId, URL, fileName, basePath, c
  * @param {Object} params - The parameters object.
  * @param {Express.Request} params.req - The Express request object.
  * @param {Express.Response} [params.res] - The Express response object.
- * @param {Express.Multer.File} params.file - The uploaded file.
  * @param {ImageMetadata} params.metadata - Additional metadata for the file.
  * @param {boolean} params.returnFile - Whether to return the file metadata or return response as normal.
  * @returns {Promise<void>}
  */
-const processImageFile = async ({ req, res, file, metadata, returnFile = false }) => {
+const processImageFile = async ({ req, res, metadata, returnFile = false }) => {
+  const { file } = req;
   const source = req.app.locals.fileStrategy;
   const { handleImageUpload } = getStrategyFunctions(source);
   const { file_id, temp_file_id, endpoint } = metadata;
@@ -424,11 +424,11 @@ const processFileUpload = async ({ req, res, file, metadata }) => {
  * @param {Object} params - The parameters object.
  * @param {Express.Request} params.req - The Express request object.
  * @param {Express.Response} params.res - The Express response object.
- * @param {Express.Multer.File} params.file - The uploaded file.
  * @param {FileMetadata} params.metadata - Additional metadata for the file.
  * @returns {Promise<void>}
  */
-const processAgentFileUpload = async ({ req, res, file, metadata }) => {
+const processAgentFileUpload = async ({ req, res, metadata }) => {
+  const { file } = req;
   const { agent_id, tool_resource } = metadata;
   if (agent_id && !tool_resource) {
     throw new Error('No tool resource provided for agent file upload');
@@ -708,20 +708,20 @@ async function retrieveAndProcessFile({
  * Filters a file based on its size and the endpoint origin.
  *
  * @param {Object} params - The parameters for the function.
- * @param {object} params.req - The request object from Express.
+ * @param {ServerRequest} params.req - The request object from Express.
  * @param {string} [params.req.endpoint]
  * @param {string} [params.req.file_id]
  * @param {number} [params.req.width]
  * @param {number} [params.req.height]
  * @param {number} [params.req.version]
- * @param {Express.Multer.File} params.file - The file uploaded to the server via multer.
  * @param {boolean} [params.image] - Whether the file expected is an image.
  * @param {boolean} [params.isAvatar] - Whether the file expected is a user or entity avatar.
  * @returns {void}
  *
  * @throws {Error} If a file exception is caught (invalid file size or type, lack of metadata).
  */
-function filterFile({ req, file, image, isAvatar }) {
+function filterFile({ req, image, isAvatar }) {
+  const { file } = req;
   const { endpoint, file_id, width, height } = req.body;
 
   if (!file_id && !isAvatar) {
