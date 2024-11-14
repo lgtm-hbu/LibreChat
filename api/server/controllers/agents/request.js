@@ -109,11 +109,13 @@ const AgentController = async (req, res, next, initializeClient, addTitle) => {
       });
       res.end();
 
-      await saveMessage(
-        req,
-        { ...response, user },
-        { context: 'api/server/controllers/agents/request.js - response end' },
-      );
+      if (!client.savedMessageIds.has(response.messageId)) {
+        await saveMessage(
+          req,
+          { ...response, user },
+          { context: 'api/server/controllers/agents/request.js - response end' },
+        );
+      }
     }
 
     if (!client.skipSaveUserMessage) {
