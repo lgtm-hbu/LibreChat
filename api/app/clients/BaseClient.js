@@ -50,6 +50,8 @@ class BaseClient {
     /** The key for the usage object's output tokens
      * @type {string} */
     this.outputTokensKey = 'completion_tokens';
+    /** @type {Set<string>} */
+    this.savedMessageIds = new Set();
   }
 
   setOptions() {
@@ -545,6 +547,7 @@ class BaseClient {
 
     if (!isEdited && !this.skipSaveUserMessage) {
       this.userMessagePromise = this.saveMessageToDatabase(userMessage, saveOptions, user);
+      this.savedMessageIds.add(userMessage.messageId);
       if (typeof opts?.getReqData === 'function') {
         opts.getReqData({
           userMessagePromise: this.userMessagePromise,
@@ -574,6 +577,7 @@ class BaseClient {
     const completion = await this.sendCompletion(payload, opts);
     this.abortController.requestCompleted = true;
 
+    /** @type {TMessage} */
     const responseMessage = {
       messageId: responseMessageId,
       conversationId,
@@ -636,6 +640,7 @@ class BaseClient {
     }
 
     this.responsePromise = this.saveMessageToDatabase(responseMessage, saveOptions, user);
+    this.savedMessageIds.add(responseMessage.messageId);
     const messageCache = getLogStores(CacheKeys.MESSAGES);
     messageCache.set(
       responseMessageId,
