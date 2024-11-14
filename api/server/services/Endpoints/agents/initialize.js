@@ -16,6 +16,7 @@ const { getCustomEndpointConfig } = require('~/server/services/Config');
 const { loadAgentTools } = require('~/server/services/ToolService');
 const AgentClient = require('~/server/controllers/agents/client');
 const { getModelMaxTokens } = require('~/utils');
+const { logger } = require('~/config');
 
 const providerConfigMap = {
   [EModelEndpoint.openAI]: initOpenAI,
@@ -23,6 +24,49 @@ const providerConfigMap = {
   [EModelEndpoint.anthropic]: initAnthropic,
   [EModelEndpoint.bedrock]: getBedrockOptions,
   [Providers.OLLAMA]: initCustom,
+};
+
+/**
+ *
+ * @param {Promise<Array<MongoFile>> | undefined} _attachments
+ * @param {AgentToolResources | undefined} _tool_resources
+ * @returns {Promise<{ attachments: Array<MongoFile | undefined> | undefined, tool_resources: AgentToolResources | undefined }>}
+ */
+const primeResources = async (_attachments, _tool_resources) => {
+  try {
+    if (!_attachments) {
+      return { attachments: undefined, tool_resources: undefined };
+    }
+    /** @type {Array<MongoFile | undefined> | undefined} */
+    const files = await _attachments;
+    const attachments = [];
+    const tool_resources = _tool_resources ?? {};
+
+    for (const file of files) {
+      if (!file) {
+        continue;
+      }
+      if (file.type.startsWith('image')) {
+        attachments.push(file);
+      }
+
+      if (file.metadata?.fileIdentifier) {
+        if (!tool_resources.execute_code) {
+          tool_resources.execute_code = { files: [] };
+        }
+        tool_resources.execute_code.files.push(file);
+      } else if (file.embedded === true) {
+        if (!tool_resources.file_search) {
+          tool_resources.file_search = { files: [] };
+        }
+        tool_resources.file_search.files.push(file);
+      }
+    }
+    return { attachments, tool_resources };
+  } catch (error) {
+    logger.error(error);
+    return { attachments: undefined, tool_resources: undefined };
+  }
 };
 
 const initializeClient = async ({ req, res, endpointOption }) => {
@@ -54,11 +98,16 @@ const initializeClient = async ({ req, res, endpointOption }) => {
     throw new Error('Agent not found');
   }
 
+  const { attachments, tool_resources } = await primeResources(
+    endpointOption.attachments,
+    agent.tool_resources,
+  );
+
   const { tools } = await loadAgentTools({
     req,
     tools: agent.tools,
     agent_id: agent.id,
-    tool_resources: agent.tool_resources,
+    tool_resources,
   });
 
   const provider = agent.provider;
@@ -102,13 +151,13 @@ const initializeClient = async ({ req, res, endpointOption }) => {
     agent,
     tools,
     sender,
+    attachments,
     contentParts,
     modelOptions,
     eventHandlers,
     collectedUsage,
     artifactPromises,
     endpoint: EModelEndpoint.agents,
-    attachments: endpointOption.attachments,
     maxContextTokens:
       agent.max_context_tokens ??
       getModelMaxTokens(modelOptions.model, providerEndpointMap[provider]) ??

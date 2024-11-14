@@ -149,6 +149,9 @@ const useFileHandling = (params?: UseFileHandling) => {
             : error?.response?.data?.message ?? 'com_error_files_upload';
         setError(errorMessage);
       },
+      onMutate: () => {
+        setToolResource(undefined);
+      },
     },
     abortControllerRef.current?.signal,
   );

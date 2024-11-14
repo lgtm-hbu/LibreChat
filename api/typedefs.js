@@ -810,6 +810,12 @@
  */
 
 /**
+ * @exports AgentToolResources
+ * @typedef {import('librechat-data-provider').AgentToolResources} AgentToolResources
+ * @memberof typedefs
+ */
+
+/**
  * @exports AgentCreateParams
  * @typedef {import('librechat-data-provider').AgentCreateParams} AgentCreateParams
  * @memberof typedefs

@@ -142,7 +142,8 @@ async function getSessionInfo(fileIdentifier, apiKey) {
 const primeFiles = async (options, apiKey) => {
   const { tool_resources } = options;
   const file_ids = tool_resources?.[EToolResources.execute_code]?.file_ids ?? [];
-  const dbFiles = await getFiles({ file_id: { $in: file_ids } });
+  const resourceFiles = tool_resources?.[EToolResources.execute_code]?.files ?? [];
+  const dbFiles = ((await getFiles({ file_id: { $in: file_ids } })) ?? []).concat(resourceFiles);
 
   const files = [];
   const sessions = new Map();
