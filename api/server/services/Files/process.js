@@ -44,7 +44,7 @@ const processFiles = async (files) => {
  * Enqueues the delete operation to the leaky bucket queue if necessary, or adds it directly to promises.
  *
  * @param {object} params - The passed parameters.
- * @param {Express.Request} params.req - The express request object.
+ * @param {ServerRequest} params.req - The express request object.
  * @param {MongoFile} params.file - The file object to delete.
  * @param {Function} params.deleteFile - The delete file function.
  * @param {Promise[]} params.promises - The array of promises to await.
@@ -91,7 +91,7 @@ function enqueueDeleteOperation({ req, file, deleteFile, promises, resolvedFileI
  *
  * @param {Object} params - The params object.
  * @param {MongoFile[]} params.files - The file objects to delete.
- * @param {Express.Request} params.req - The express request object.
+ * @param {ServerRequest} params.req - The express request object.
  * @param {DeleteFilesBody} params.req.body - The request body.
  * @param {string} [params.req.body.agent_id] - The agent ID if file uploaded is associated to an agent.
  * @param {string} [params.req.body.assistant_id] - The assistant ID if file uploaded is associated to an assistant.
@@ -242,7 +242,7 @@ const processFileURL = async ({ fileStrategy, userId, URL, fileName, basePath, c
  * Saves file metadata to the database with an expiry TTL.
  *
  * @param {Object} params - The parameters object.
- * @param {Express.Request} params.req - The Express request object.
+ * @param {ServerRequest} params.req - The Express request object.
  * @param {Express.Response} [params.res] - The Express response object.
  * @param {ImageMetadata} params.metadata - Additional metadata for the file.
  * @param {boolean} params.returnFile - Whether to return the file metadata or return response as normal.
@@ -289,7 +289,7 @@ const processImageFile = async ({ req, res, metadata, returnFile = false }) => {
  * returns minimal file metadata, without saving to the database.
  *
  * @param {Object} params - The parameters object.
- * @param {Express.Request} params.req - The Express request object.
+ * @param {ServerRequest} params.req - The Express request object.
  * @param {FileContext} params.context - The context of the file (e.g., 'avatar', 'image_generation', etc.)
  * @param {boolean} [params.resize=true] - Whether to resize and convert the image to target format. Default is `true`.
  * @param {{ buffer: Buffer, width: number, height: number, bytes: number, filename: string, type: string, file_id: string }} [params.metadata] - Required metadata for the file if resize is false.
@@ -335,7 +335,7 @@ const uploadImageBuffer = async ({ req, context, metadata = {}, resize = true })
  * Files must be deleted from the server filesystem manually.
  *
  * @param {Object} params - The parameters object.
- * @param {Express.Request} params.req - The Express request object.
+ * @param {ServerRequest} params.req - The Express request object.
  * @param {Express.Response} params.res - The Express response object.
  * @param {FileMetadata} params.metadata - Additional metadata for the file.
  * @returns {Promise<void>}
@@ -422,7 +422,7 @@ const processFileUpload = async ({ req, res, metadata }) => {
  * Files must be deleted from the server filesystem manually.
  *
  * @param {Object} params - The parameters object.
- * @param {Express.Request} params.req - The Express request object.
+ * @param {ServerRequest} params.req - The Express request object.
  * @param {Express.Response} params.res - The Express response object.
  * @param {FileMetadata} params.metadata - Additional metadata for the file.
  * @returns {Promise<void>}
@@ -576,7 +576,7 @@ const processOpenAIFile = async ({
 /**
  * Process OpenAI image files, convert to target format, save and return file metadata.
  * @param {object} params - The params object.
- * @param {Express.Request} params.req - The Express request object.
+ * @param {ServerRequest} params.req - The Express request object.
  * @param {Buffer} params.buffer - The image buffer.
  * @param {string} params.file_id - The file ID.
  * @param {string} params.filename - The filename.
