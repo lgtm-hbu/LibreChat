@@ -46,10 +46,6 @@ const primeResources = async (_attachments, _tool_resources) => {
       if (!file) {
         continue;
       }
-      if (file.type.startsWith('image')) {
-        attachments.push(file);
-      }
-
       if (file.metadata?.fileIdentifier) {
         if (!tool_resources.execute_code) {
           tool_resources.execute_code = { files: [] };
@@ -61,6 +57,8 @@ const primeResources = async (_attachments, _tool_resources) => {
         }
         tool_resources.file_search.files.push(file);
       }
+
+      attachments.push(file);
     }
     return { attachments, tool_resources };
   } catch (error) {

@@ -15,6 +15,7 @@ const {
   EModelEndpoint,
   KnownEndpoints,
   anthropicSchema,
+  isAgentsEndpoint,
   bedrockOutputParser,
   removeNullishValues,
 } = require('librechat-data-provider');
@@ -245,7 +246,8 @@ class AgentClient extends BaseClient {
       this.options.attachments = files;
     }
 
-    if (this.message_file_map) {
+    /** Note: Bedrock uses legacy RAG API handling */
+    if (this.message_file_map && !isAgentsEndpoint(this.options.endpoint)) {
       this.contextHandlers = createContextHandlers(
         this.options.req,
         orderedMessages[orderedMessages.length - 1].text,
