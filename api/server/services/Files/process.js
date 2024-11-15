@@ -29,10 +29,34 @@ const { getStrategyFunctions } = require('./strategies');
 const { determineFileType } = require('~/server/utils');
 const { logger } = require('~/config');
 
-const processFiles = async (files) => {
+/**
+ *
+ * @param {Array<MongoFile>} files
+ * @param {Array<string>} [fileIds]
+ * @returns
+ */
+const processFiles = async (files, fileIds) => {
   const promises = [];
+  const seen = new Set();
+
   for (let file of files) {
     const { file_id } = file;
+    if (seen.has(file_id)) {
+      continue;
+    }
+    seen.add(file_id);
+    promises.push(updateFileUsage({ file_id }));
+  }
+
+  if (!fileIds) {
+    return await Promise.all(promises);
+  }
+
+  for (let file_id of fileIds) {
+    if (seen.has(file_id)) {
+      continue;
+    }
+    seen.add(file_id);
     promises.push(updateFileUsage({ file_id }));
   }
 

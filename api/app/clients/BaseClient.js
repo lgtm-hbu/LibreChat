@@ -639,6 +639,14 @@ class BaseClient {
       responseMessage.attachments = (await Promise.all(this.artifactPromises)).filter((a) => a);
     }
 
+    if (this.options.attachments) {
+      try {
+        saveOptions.files = this.options.attachments.map((attachments) => attachments.file_id);
+      } catch (error) {
+        logger.error('[BaseClient] Error mapping attachments for conversation', error);
+      }
+    }
+
     this.responsePromise = this.saveMessageToDatabase(responseMessage, saveOptions, user);
     this.savedMessageIds.add(responseMessage.messageId);
     const messageCache = getLogStores(CacheKeys.MESSAGES);
@@ -966,6 +974,14 @@ class BaseClient {
       return _messages;
     }
 
+    const seen = new Set();
+    const attachmentsProcessed = !(this.options.attachments instanceof Promise);
+    if (attachmentsProcessed) {
+      for (const attachment of this.options.attachments) {
+        seen.add(attachment.file_id);
+      }
+    }
+
     /**
      *
      * @param {TMessage} message
@@ -976,7 +992,14 @@ class BaseClient {
         this.message_file_map = {};
       }
 
-      const fileIds = message.files.map((file) => file.file_id);
+      const fileIds = [];
+      for (const file of message.files) {
+        if (seen.has(file.file_id)) {
+          continue;
+        }
+        fileIds.push(file.file_id);
+        seen.add(file.file_id);
+      }
       const files = await getFiles({
         file_id: { $in: fileIds },
       });

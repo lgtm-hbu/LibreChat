@@ -28,7 +28,7 @@ const providerConfigMap = {
 
 /**
  *
- * @param {Promise<Array<MongoFile>> | undefined} _attachments
+ * @param {Promise<Array<MongoFile | null>> | undefined} _attachments
  * @param {AgentToolResources | undefined} _tool_resources
  * @returns {Promise<{ attachments: Array<MongoFile | undefined> | undefined, tool_resources: AgentToolResources | undefined }>}
  */
