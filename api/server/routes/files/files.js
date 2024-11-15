@@ -107,6 +107,10 @@ router.delete('/', async (req, res) => {
   }
 });
 
+function isValidID(str) {
+  return /^[A-Za-z0-9_-]{21}$/.test(str);
+}
+
 router.get('/code/download/:session_id/:fileId', async (req, res) => {
   try {
     const { session_id, fileId } = req.params;
@@ -114,6 +118,11 @@ router.get('/code/download/:session_id/:fileId', async (req, res) => {
     logger.debug(logPrefix);
 
     if (!session_id || !fileId) {
+      return res.status(400).send('Bad request');
+    }
+
+    if (!isValidID(session_id) || !isValidID(fileId)) {
+      logger.debug(`${logPrefix} invalid session_id or fileId`);
       return res.status(400).send('Bad request');
     }
 
