@@ -1000,6 +1000,11 @@ class BaseClient {
         fileIds.push(file.file_id);
         seen.add(file.file_id);
       }
+
+      if (fileIds.length === 0) {
+        return message;
+      }
+
       const files = await getFiles({
         file_id: { $in: fileIds },
       });

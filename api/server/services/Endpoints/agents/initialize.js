@@ -155,8 +155,11 @@ const initializeClient = async ({ req, res, endpointOption }) => {
     eventHandlers,
     collectedUsage,
     artifactPromises,
+    spec: endpointOption.spec,
     endpoint: EModelEndpoint.agents,
+    resendFiles: endpointOption.resendFiles,
     maxContextTokens:
+      endpointOption.maxContextTokens ??
       agent.max_context_tokens ??
       getModelMaxTokens(modelOptions.model, providerEndpointMap[provider]) ??
       4000,
