@@ -975,7 +975,8 @@ class BaseClient {
     }
 
     const seen = new Set();
-    const attachmentsProcessed = !(this.options.attachments instanceof Promise);
+    const attachmentsProcessed =
+      this.options.attachments && !(this.options.attachments instanceof Promise);
     if (attachmentsProcessed) {
       for (const attachment of this.options.attachments) {
         seen.add(attachment.file_id);

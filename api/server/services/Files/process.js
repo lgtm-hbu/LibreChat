@@ -477,6 +477,7 @@ const processAgentFileUpload = async ({ req, res, metadata }) => {
       stream,
       filename: file.originalname,
       apiKey: result[EnvVar.CODE_API_KEY],
+      entity_id: messageAttachment === true ? undefined : agent_id,
     });
     fileInfoMetadata = { fileIdentifier };
   }
