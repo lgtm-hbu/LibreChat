@@ -35,7 +35,7 @@ const providerConfigMap = {
 const primeResources = async (_attachments, _tool_resources) => {
   try {
     if (!_attachments) {
-      return { attachments: undefined, tool_resources: undefined };
+      return { attachments: undefined, tool_resources: _tool_resources };
     }
     /** @type {Array<MongoFile | undefined> | undefined} */
     const files = await _attachments;
@@ -47,13 +47,15 @@ const primeResources = async (_attachments, _tool_resources) => {
         continue;
       }
       if (file.metadata?.fileIdentifier) {
-        if (!tool_resources.execute_code) {
-          tool_resources.execute_code = { files: [] };
+        const execute_code = tool_resources.execute_code ?? { files: [] };
+        if (!execute_code.files) {
+          tool_resources.execute_code = { ...execute_code, files: [] };
         }
         tool_resources.execute_code.files.push(file);
       } else if (file.embedded === true) {
-        if (!tool_resources.file_search) {
-          tool_resources.file_search = { files: [] };
+        const file_search = tool_resources.file_search ?? { files: [] };
+        if (!file_search.files) {
+          tool_resources.file_search = { ...file_search, files: [] };
         }
         tool_resources.file_search.files.push(file);
       }
@@ -63,7 +65,7 @@ const primeResources = async (_attachments, _tool_resources) => {
     return { attachments, tool_resources };
   } catch (error) {
     logger.error(error);
-    return { attachments: undefined, tool_resources: undefined };
+    return { attachments: _attachments, tool_resources: _tool_resources };
   }
 };
 

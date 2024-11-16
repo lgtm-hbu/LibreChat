@@ -190,7 +190,7 @@ const useFileHandling = (params?: UseFileHandling) => {
       if (toolResource != null) {
         formData.append('tool_resource', toolResource);
       }
-      if (conversation?.agent_id != null) {
+      if (conversation?.agent_id != null && formData.get('agent_id') == null) {
         formData.append('agent_id', conversation.agent_id);
       }
     }

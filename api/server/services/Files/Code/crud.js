@@ -47,6 +47,9 @@ async function getCodeOutputDownloadStream(fileIdentifier, apiKey) {
 async function uploadCodeEnvFile({ req, stream, filename, apiKey, entity_id = '' }) {
   try {
     const form = new FormData();
+    if (entity_id.length > 0) {
+      form.append('entity_id', entity_id);
+    }
     form.append('file', stream, filename);
 
     const baseURL = getCodeBaseURL();

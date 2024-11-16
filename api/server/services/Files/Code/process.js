@@ -157,7 +157,8 @@ const primeFiles = async (options, apiKey) => {
   const sessions = new Map();
   for (const file of dbFiles) {
     if (file.metadata.fileIdentifier) {
-      const [session_id, id] = file.metadata.fileIdentifier.split('/');
+      const [path, queryString] = file.metadata.fileIdentifier.split('?');
+      const [session_id, id] = path.split('/');
       const pushFile = () => {
         files.push({
           id,
@@ -169,6 +170,12 @@ const primeFiles = async (options, apiKey) => {
         pushFile();
         continue;
       }
+
+      let queryParams = {};
+      if (queryString) {
+        queryParams = Object.fromEntries(new URLSearchParams(queryString).entries());
+      }
+
       const reuploadFile = async () => {
         try {
           const { getDownloadStream } = getStrategyFunctions(file.source);
@@ -180,6 +187,7 @@ const primeFiles = async (options, apiKey) => {
             req: options.req,
             stream,
             filename: file.filename,
+            entity_id: queryParams.entity_id,
             apiKey,
           });
           await updateFile({ file_id: file.file_id, metadata: { fileIdentifier } });
