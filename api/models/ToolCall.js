@@ -70,12 +70,17 @@ async function updateToolCall(id, updateData) {
 
 /**
  * Delete a tool call
- * @param {string} id - The tool call document ID
- * @returns {Promise<ToolCallData|null>} The deleted tool call document or null if not found
+ * @param {string} userId - The related user's ObjectId
+ * @param {string} [conversationId] - The tool call conversation ID
+ * @returns {Promise<{ ok?: number; n?: number; deletedCount?: number }>} The result of the delete operation
  */
-async function deleteToolCall(id) {
+async function deleteToolCalls(userId, conversationId) {
   try {
-    return await ToolCall.findByIdAndDelete(id);
+    const query = { user: userId };
+    if (conversationId) {
+      query.conversationId = conversationId;
+    }
+    return await ToolCall.deleteMany(query);
   } catch (error) {
     throw new Error(`Error deleting tool call: ${error.message}`);
   }
@@ -84,7 +89,7 @@ async function deleteToolCall(id) {
 module.exports = {
   createToolCall,
   updateToolCall,
-  deleteToolCall,
+  deleteToolCalls,
   getToolCallById,
   getToolCallsByConvo,
   getToolCallsByMessage,
