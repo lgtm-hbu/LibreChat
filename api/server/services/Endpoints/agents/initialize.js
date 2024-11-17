@@ -47,13 +47,13 @@ const primeResources = async (_attachments, _tool_resources) => {
         continue;
       }
       if (file.metadata?.fileIdentifier) {
-        const execute_code = tool_resources.execute_code ?? { files: [] };
+        const execute_code = tool_resources.execute_code ?? {};
         if (!execute_code.files) {
           tool_resources.execute_code = { ...execute_code, files: [] };
         }
         tool_resources.execute_code.files.push(file);
       } else if (file.embedded === true) {
-        const file_search = tool_resources.file_search ?? { files: [] };
+        const file_search = tool_resources.file_search ?? {};
         if (!file_search.files) {
           tool_resources.file_search = { ...file_search, files: [] };
         }
@@ -64,7 +64,7 @@ const primeResources = async (_attachments, _tool_resources) => {
     }
     return { attachments, tool_resources };
   } catch (error) {
-    logger.error(error);
+    logger.error('Error priming resources', error);
     return { attachments: _attachments, tool_resources: _tool_resources };
   }
 };
