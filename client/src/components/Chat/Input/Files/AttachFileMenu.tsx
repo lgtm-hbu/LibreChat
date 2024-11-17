@@ -39,14 +39,14 @@ const AttachFile = ({ isRTL, disabled, setToolResource, handleFileChange }: Atta
       },
       icon: <ImageUpIcon className="icon-md" />,
     },
-    {
-      label: localize('com_ui_upload_file_search'),
-      onClick: () => {
-        setToolResource?.(EToolResources.file_search);
-        handleUploadClick();
-      },
-      icon: <FileSearch className="icon-md" />,
-    },
+    // {
+    //   label: localize('com_ui_upload_file_search'),
+    //   onClick: () => {
+    //     setToolResource?.(EToolResources.file_search);
+    //     handleUploadClick();
+    //   },
+    //   icon: <FileSearch className="icon-md" />,
+    // },
     {
       label: localize('com_ui_upload_code_files'),
       onClick: () => {
