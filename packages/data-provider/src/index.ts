@@ -7,6 +7,7 @@ export * from './file-config';
 export * from './artifacts';
 /* schema helpers  */
 export * from './parsers';
+export * from './zod';
 /* custom/dynamic configurations  */
 export * from './models';
 export * from './generate';
